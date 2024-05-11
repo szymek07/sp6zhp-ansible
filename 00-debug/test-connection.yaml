@@ -1,0 +1,13 @@
+- name: Test connection and check sudo
+  hosts: all
+  tasks:
+    - name: Ping
+      ping:
+
+    - become: true
+      command: id -u
+      register: id_output
+
+    - assert:
+        that: id_output.stdout == '0'
+
