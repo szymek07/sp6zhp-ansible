@@ -1,0 +1,72 @@
+- name: Install WGDashboard
+  hosts: all
+  tasks:
+    - name: Fail if wgdashboard_dir is undefined
+      ansible.builtin.fail: msg="wgdashboard_dir is not defined. You should set it in playbook additional vars."
+      when: wgdashboard_dir is undefined
+
+    - name: Install avahi-daemon if is not installed
+      apt:
+        pkg:
+          - gunicorn
+          - python3-pip
+          - python3.11-venv
+
+    - name: Clone WGDashboard repo
+      git:
+        repo: https://github.com/donaldzou/WGDashboard.git
+        dest: "{{ wgdashboard_dir }}"
+        version: v3.0.6
+        force: true
+
+    - name: Make wgd.sh excutable
+      file:
+        path: "{{ wgdashboard_dir }}/src/wgd.sh"
+        mode: "u+x"
+
+    - name: Create python venv
+      shell: python3 -m venv .venv
+      args:
+        chdir: "{{ wgdashboard_dir }}/src/"
+        creates: "{{ wgdashboard_dir }}/src/.venv"
+
+    - name: Create venv wrapper
+      template:
+        src: venv-wrapper.sh.j2
+        dest: "{{ wgdashboard_dir }}/src/venv-wrapper.sh"
+        mode: 0755
+
+    - name: Run wgd.sh install
+      ansible.builtin.shell: ./wgd.sh install
+      args:
+        chdir: "{{ wgdashboard_dir }}/src/"
+        executable: ./venv-wrapper.sh
+
+# TODO:
+#    - name: Run wgd.sh start
+#      ansible.builtin.shell: ./wgd.sh start
+#      args:
+#        chdir: /srv/wgdashboard/src/
+#        executable: ./venv-wrapper.sh
+
+#    - name: Install and start wgd.sh
+#      shell:
+#        cmd: |
+#          source ./venv/bin/activate
+#          ./wgd.sh install
+#          ./wgd.sh start
+#      args:
+#        chdir: /srv/wgdashboard/src/
+
+#    - name: Run wgd.sh install
+#      command: |
+#        /srv/wgdashboard/src/wgd.sh install
+#
+#    - name: Run wgd.sh start
+#      command: |
+#        /srv/wgdashboard/src/wgd.sh start
+#
+#  python3 -m venv .venv
+#  source .venv/bin/activate
+#        python3 -m venv ./venv
+#python3 -m venv .venv

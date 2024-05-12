@@ -3,26 +3,29 @@
   vars:
     semaphore_stack_name: "semaphore"
     semaphore_deployed: "false"
-    semaphore_db_dir: "/srv/semaphore/db"
     docker_primary_env_name: "primary"
   tasks:
-    - name: Show user info
-      debug:
-        msg:
-          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
-
+    - name: Fail if semaphore_db_dir is undefined
+      ansible.builtin.fail: msg="semaphore_db_dir is not defined. You should set it in playbook additional vars."
+      when: semaphore_db_dir is undefined
 
     - name: Fail if portainer_api_key is undefined
       ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
       when: portainer_api_key is undefined
 
-    - name: Fail if semaphore_db_pass is undefined
+    - name: Fail if  is undefined
       ansible.builtin.fail: msg="semaphore_db_pass is not defined"
       when: semaphore_db_pass is undefined
 
     - name: Fail if semaphore_admin_pass is undefined
       ansible.builtin.fail: msg="semaphore_admin_pass is not defined"
       when: semaphore_admin_pass is undefined
+
+    - name: Show user info
+      debug:
+        msg:
+          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
+          - "Semaphore db will be placed in {{ semaphore_db_dir }}."
 
     - name: Install httpie
       apt:

@@ -4,7 +4,7 @@
     - name: Show user info
       debug:
         msg:
-          - "portainer_data_dir is {% if portainer_data_dir is defined %}defined. Portainer will use {{ portainer_data_dir }} location as data dir.{% else %}not defined. Portainer will use default docker volume.{% endif %}"
+          - "portainer_data_dir is {% if portainer_data_dir is defined %}defined. Portainer will use {{ portainer_data_dir }} location as portainer data dir.{% else %}not defined. Portainer will use default docker volume.{% endif %}"
           - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
 
     - name: Check if docker is installed
