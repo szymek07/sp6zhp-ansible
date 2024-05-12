@@ -1,0 +1,13 @@
+#tell ddclient how to get your ip address
+use=web, web=ip.changeip.com
+
+daemon=1200                             # check every 20 min
+
+protocol={{ protocol }}
+ssl=yes
+server=nic.changeip.com/nic/update
+login={{ ddns_login }}
+password={{ ddns_password }}
+
+#specify the domain to update
+{{ ddns_domain }}

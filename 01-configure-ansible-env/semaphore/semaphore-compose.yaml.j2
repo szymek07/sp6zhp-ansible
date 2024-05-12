@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    restart: unless-stopped
+    image: mariadb:11
+    volumes:
+      - "{{ semaphore_db_dir }}:/var/lib/mysql"
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "semaphore"
+      MYSQL_USER: "semaphore"
+      MYSQL_PASSWORD: "${DB_PASS}"
+  semaphore:
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    image: semaphoreui/semaphore:latest
+    environment:
+      SEMAPHORE_DB_USER: "semaphore"
+      SEMAPHORE_DB_PASS: "${DB_PASS}"
+      SEMAPHORE_DB_HOST: "db"
+      SEMAPHORE_DB_PORT: 3306
+      SEMAPHORE_DB_DIALECT: "mysql"
+      SEMAPHORE_DB: "semaphore"
+      SEMAPHORE_PLAYBOOK_PATH: "/tmp/semaphore/"
+      SEMAPHORE_ADMIN_PASSWORD: "${SEM_ADM_PASS}"
+      SEMAPHORE_ADMIN_NAME: "admin"
+      SEMAPHORE_ADMIN_EMAIL: "admin@localhost"
+      SEMAPHORE_ADMIN: "admin"
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: "${SEM_ENCR_KEY}"
+    depends_on:
+      - db

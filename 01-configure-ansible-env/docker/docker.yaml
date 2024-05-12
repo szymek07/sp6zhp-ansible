@@ -1,0 +1,96 @@
+- name: Install Docker
+  hosts: all
+  tasks:
+
+    - name: Show user info
+      debug:
+        msg: "docker_base_dir is {% if docker_base_dir is defined %} defined. Docker will be installed in {{ docker_base_dir }} {% else %}not defined. Docker will be installed in default dir.{% endif %}"
+
+    - name: Check if docker is installed
+      command: "which docker"
+      register: docker_installed
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install required packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg2
+          - software-properties-common
+      when: docker_installed.rc != 0
+
+    - apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+      when: docker_installed.rc != 0
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable
+        state: present
+      when: docker_installed.rc != 0
+
+    - name: Install Docker Engine
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+      when: docker_installed.rc != 0
+
+    - name: Add Docker group
+      group:
+        name: docker
+        state: present
+      when: docker_installed.rc != 0
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+      when: docker_installed.rc != 0
+
+    - name: Create docker base dir
+      command: "mkdir {{ docker_base_dir }}"
+      args:
+        creates: "{{ docker_base_dir }}"
+      when: docker_installed.rc != 0 and docker_base_dir is defined
+
+    - name: Create docker daemon.json file
+      template:
+        src: docker-demon.json.j2
+        dest: /etc/docker/daemon.json
+      when: docker_installed.rc != 0 and docker_base_dir is defined
+
+    - name: Enable and start Docker services
+      systemd:
+        name: "{{ item }}"
+        enabled: true
+        state: started
+      loop:
+        - docker.service
+        - containerd.service
+      when: docker_installed.rc != 0
+
+    - name: Check if docker is in swarm mode
+      command: "docker node ls"
+      register: docker_swarm
+      changed_when: false
+      ignore_errors: true
+
+#    - name: Debug docker_swarm
+#      debug:
+#        var: docker_swarm
+
+    - name: Initialize docker swarm mode
+      command: "docker swarm init"
+      when: docker_swarm.rc != 0
+
+
+

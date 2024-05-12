@@ -1,0 +1,61 @@
+- name: Run Portainer CE
+  hosts: all
+  tasks:
+    - name: Show user info
+      debug:
+        msg:
+          - "portainer_data_dir is {% if portainer_data_dir is defined %}defined. Portainer will use {{ portainer_data_dir }} location as data dir.{% else %}not defined. Portainer will use default docker volume.{% endif %}"
+          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
+
+    - name: Check if portainer is running
+      ansible.builtin.command: "docker ps -q --filter name=portainer"
+      register: portainer_running
+      changed_when: false
+      ignore_errors: true
+
+    - name: Create docker stacks dir
+      file:
+        path: "{{ docker_stacks_dir }}"
+        state: directory
+      when: portainer_running.stdout == "" and docker_stacks_dir is defined
+
+    - name: Download Portainer CE compose file
+      get_url:
+        url: https://downloads.portainer.io/ce2-19/portainer-agent-stack.yml
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/portainer-agent-stack.yml"
+      when: portainer_running.stdout == ""
+
+    - name: Replace portainer docker volume dir
+      replace:
+        path: "{{ docker_stacks_dir }}/portainer-agent-stack.yml"
+        regexp: '/var/lib/docker/volumes:'
+        replace: '{{ docker_base_dir }}/volumes:'
+      when: portainer_running.stdout == "" and portainer_data_dir is defined
+
+    - name: Replace portainer data dir
+      replace:
+        path: "{{ docker_stacks_dir }}/portainer-agent-stack.yml"
+        regexp: 'portainer_data:'
+        replace: '{{ portainer_data_dir }}:'
+      when: portainer_running.stdout == "" and portainer_data_dir is defined
+
+    - name: Remove volumes section
+      replace:
+        path: "{{ docker_stacks_dir }}/portainer-agent-stack.yml"
+        regexp: 'volumes:\n  /srv/portainer:'
+        replace: ''
+      when: portainer_running.stdout == "" and portainer_data_dir is defined
+
+    - name: Create portainer data dir
+      command: "mkdir {{ portainer_data_dir }}"
+      args:
+        creates: "{{ portainer_data_dir }}"
+      when: portainer_running.stdout == "" and portainer_data_dir is defined
+
+    - name: Run portainer container
+      command: "docker stack deploy -c {{ docker_stacks_dir | default('/tmp') }}/portainer-agent-stack.yml portainer"
+      when: portainer_running.stdout == ""
+
+    - name: Manual configure portainer
+      ansible.builtin.fail: msg="Now you should configure portainer on https://{{ ansible_default_ipv4.address }}:9443"
+      when: portainer_running.stdout == ""

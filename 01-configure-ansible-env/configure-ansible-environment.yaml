@@ -1,0 +1,26 @@
+- name: Configure ansible env
+  hosts: all
+  tasks:
+    - name: Update and upgrade all packages to the latest version
+      apt:
+        update_cache: true
+        upgrade: dist
+        cache_valid_time: 3600
+
+- name: Install docker
+  import_playbook: docker/docker.yaml
+
+- name: Deploy portainer
+  import_playbook: portainer/portainer.yaml
+
+- name: Install avahi-daemon
+  import_playbook: avahi/avahi.yaml
+
+- name: Deploy Ansible semaphore
+  import_playbook: semaphore/semaphore.yaml
+
+- name: Deploy and configure ddclient
+  import_playbook: ddclient/ddclient.yaml
+
+#- name: Deploy WGDashboard
+#  import_playbook: subtasks/wg-dashboard.yaml

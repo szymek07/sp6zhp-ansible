@@ -1,0 +1,16 @@
+- name: Install and run avahi-daemon mDNS
+  hosts: all
+  tasks:
+    - name: Install avahi-daemon if is not installed
+      apt:
+        pkg:
+          - avahi-daemon
+          - avahi-utils
+
+    - name: Make sure a avahi service unit is running
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        state: started
+        enabled: true
+        name: avahi-daemon
+

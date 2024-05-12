@@ -1,0 +1,33 @@
+- name: Install and configure ddclient for change ip ddns provider
+  hosts: all
+  vars:
+    ddclient_conf_file: "/etc/ddclient.conf"
+  tasks:
+    - name: Fail if ddns_domain is undefined
+      ansible.builtin.fail: msg="ddns_domain is not defined. You should set it in playbook additional vars."
+      when: ddns_domain is undefined
+
+    - name: Fail if protocol is undefined
+      ansible.builtin.fail: msg="protocol is not defined. You should set it in playbook additional vars."
+      when: protocol is undefined
+
+    - name: Fail if protocol not supported protocol is selected
+      ansible.builtin.fail: msg="not supported protocol is selected."
+      when: protocol != "changeip"
+
+    - name: Install ddclient
+      apt:
+        pkg:
+          - ddclient
+
+    - name: Create ddclient configuration
+      template:
+        src: ddclient.conf.j2
+        dest: "{{ ddclient_conf_file }}"
+        output_encoding: "utf-8"
+
+    - name: Enable and restart ddclient
+      ansible.builtin.systemd:
+        name: ddclient
+        enabled: true
+        state: restarted
