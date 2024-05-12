@@ -1,5 +1,10 @@
 # sp6zhp-ansible
 
+--- 
+# ansible install
+
+Debian: https://docs.ansible.com/ansible/latest/installation_guide/installation_distros.html#installing-ansible-on-debian
+
 ---
 
 ## 00-debug
