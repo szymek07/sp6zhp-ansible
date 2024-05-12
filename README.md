@@ -19,7 +19,7 @@ Debian: https://docs.ansible.com/ansible/latest/installation_guide/installation_
 ``ansible-playbook -i localhost, --connection=local --ask-become 01-configure-ansible-env/avahi/avahi.yaml``
 
 ### Install and configure ddclient
-``ansible-playbook -i localhost, --connection=local --ask-become --extra-vars "ddns_domain=<domain> protocol=changeip" 01-configure-ansible-env/ddclient/ddclient.yaml``
+``ansible-playbook -i localhost, --connection=local --ask-become --extra-vars "ddns_domain=<domain> protocol=changeip ddns_login=login ddns_password=password" 01-configure-ansible-env/ddclient/ddclient.yaml``
 
 ### Install and configure docker
 ``ansible-playbook -i localhost, --connection=local --ask-become --extra-vars "docker_base_dir=/srv/docker" 01-configure-ansible-env/docker/docker.yaml``

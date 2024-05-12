@@ -11,6 +11,14 @@
       ansible.builtin.fail: msg="protocol is not defined. You should set it in playbook additional vars."
       when: protocol is undefined
 
+    - name: Fail if ddns_login is undefined
+      ansible.builtin.fail: msg="ddns_login is not defined. You should set it in playbook additional vars."
+      when: ddns_login is undefined
+
+    - name: Fail if ddns_password is undefined
+      ansible.builtin.fail: msg="ddns_password is not defined. You should set it in playbook additional vars."
+      when: ddns_password is undefined
+
     - name: Fail if protocol not supported protocol is selected
       ansible.builtin.fail: msg="not supported protocol is selected."
       when: protocol != "changeip"
