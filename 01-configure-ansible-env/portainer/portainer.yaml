@@ -16,6 +16,7 @@
         name: "{{ (ansible_connection == 'local') | ternary(lookup('env','USER'), ansible_user) }}"
         groups: docker
         append: true
+      become: true
 
     - name: Check if portainer is running
       command: "docker ps -q --filter name=portainer"
