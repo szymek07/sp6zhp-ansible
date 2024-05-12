@@ -11,7 +11,11 @@
       command: "which docker"
       register: docker_installed
 
-    - name: "Ensure user is added to the docker group: {{ ansible_user }}"
+    - name: Debug current user name
+      debug:
+        msg: "Current user: {{ (ansible_connection == 'local') | ternary(lookup('env','USER'), ansible_user) }}"
+
+    - name: "Ensure current user is added to the docker group"
       user:
         name: "{{ (ansible_connection == 'local') | ternary(lookup('env','USER'), ansible_user) }}"
         groups: docker
