@@ -1,0 +1,20 @@
+- block:
+  - name: "Debug info"
+    debug:
+      msg: 
+        - "Processing client configuration for: {{ item }}"  
+
+  - name: "Read client private key"
+    slurp:
+      src: "{{ wg_keys_dir }}/client_{{ item.name }}_private_key"
+    register: client_private_key
+
+  - name: Generate WireGuard client config file
+    template:
+      src: templates/wireguard-client.conf.j2
+      dest: "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
+
+
+
+
+  

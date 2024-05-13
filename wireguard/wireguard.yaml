@@ -1,0 +1,109 @@
+- name: Install and configure WireGuard server
+  hosts: all
+  vars:
+    server_address: "10.147.17.2/24"
+    server_port: 51820
+    peer_networks: "10.147.17.0/24"
+    server_iface_name: "eth0"
+    
+    wg_keys_dir: "/etc/wireguard/keys"
+    wg_peer_conf_dir: "/etc/wireguard/peers"
+  tasks:
+
+    - name: Fail if server_endpoint is undefined
+      fail: msg="server_endpoint is not defined. You should set it in playbook additional vars."
+      when: server_endpoint is undefined
+
+    - name: Fail if vg_conf_name is undefined
+      fail: msg="vg_conf_name is not defined. You should set it in playbook additional vars."
+      when: vg_conf_name is undefined
+
+    - name: Fail if clients is undefined
+      fail: msg="clients is not defined. You should set it in playbook additional vars."
+      when: clients is undefined
+
+
+    - name: Install basic packages
+      package:
+        name: 
+          - vim
+          - mc
+          - git
+          - curl
+          - iptables
+          - net-tools
+        state: latest
+
+    - name: Check if WireGuard is installed
+      command: "which wg"
+      register: wireguard_installed
+      changed_when: false
+      ignore_errors: true
+    
+    - name: Display WireGuard status
+      debug:
+        msg: "WireGuard is {% if wireguard_installed.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Install WireGuard if not installed
+      package:
+        name: wireguard-tools
+        state: present
+      when: wireguard_installed.rc != 0  
+
+    - name: Create subdir for keys
+      shell: "mkdir -p {{ wg_keys_dir }}"
+      args:
+        creates: "{{ wg_keys_dir }}"
+
+    - name: Generate server keys if not present
+      shell: "wg genkey | tee {{ wg_keys_dir }}/server_private_key | wg pubkey > {{ wg_keys_dir }}/server_public_key"
+      args:
+        creates: "{{ wg_keys_dir }}/server_private_key"
+      register: server_keys
+      changed_when: server_keys.stdout != ""
+
+    - name: Generate client keys if not present
+      shell: "wg genkey | tee {{ wg_keys_dir }}/client_{{ item.name }}_private_key | wg pubkey > {{ wg_keys_dir }}/client_{{ item.name }}_public_key"
+      args:
+        creates: "{{ wg_keys_dir }}/client_{{ item.name }}_private_key"
+      register: client_keys
+      changed_when: client_keys.stdout != ""
+      loop: "{{ clients }}"  
+
+    - name: Read server private key
+      slurp:
+        src: "{{ wg_keys_dir }}/server_private_key"
+      register: server_private_key
+
+    - name: Read server public key
+      slurp:
+        src: "{{ wg_keys_dir }}/server_public_key"
+      register: server_public_key
+
+    - name: Create subdir for peer configurations
+      shell: "mkdir -p {{ wg_peer_conf_dir }}"
+      args:
+        creates: "{{ wg_peer_conf_dir }}"
+
+    - name: Create WireGuard client configuration file
+      include_tasks: subtasks/create-client-config.yaml
+      loop: "{{ clients }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Generate WireGuard server configuration file
+      template:
+        src: templates/wireguard-server.conf.j2
+        dest: "/etc/wireguard/{{ vg_conf_name }}.conf"
+  
+    - name: Append WireGuard peer configuration 
+      include_tasks: subtasks/append-peer-configuration.yaml
+      loop: "{{ clients }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Enable and restart WireGuard service
+      systemd_service:
+        name: "wg-quick@{{ vg_conf_name }}"
+        state: restarted
+        enabled: yes

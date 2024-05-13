@@ -1,0 +1,16 @@
+[Interface]
+Address = {{ item.ip }}/24
+PrivateKey = {{ client_private_key.content | b64decode }}
+
+[Peer]
+###Public of the WireGuard VPN Server
+PublicKey = {{ server_public_key.content | b64decode }}
+
+### IP and Port of the WireGuard VPN Server
+Endpoint = {{ server_endpoint }}
+
+### Allow all traffic
+AllowedIPs = {{ peer_networks }}
+
+
+

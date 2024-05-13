@@ -32,3 +32,24 @@ Debian: https://docs.ansible.com/ansible/latest/installation_guide/installation_
 
 ### Install and configure WGDashboard
 ``ansible-playbook -i localhost, --connection=local --ask-become --extra-vars "wgdashboard_dir=/srv/wgdashboard" 01-configure-ansible-env/wgdashboard/wg-dashboard.yaml``
+
+--- 
+
+## WireGuard
+
+### Required args
+``
+server_endpoint: "<domain/ip>:<port>"
+vg_conf_name: "<wg_configuration_name>"
+
+clients:
+  - name: "<client_name>"
+    ip: "<client_wg_ip>"
+  - name: "<client_name>"
+    ip: "<client_wg_ip>"
+``
+## Optional args
+``
+peer_networks: "<comma_separated_networks>"
+server_iface_name: "<ethernet_interface_name>"
+``

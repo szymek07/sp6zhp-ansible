@@ -1,0 +1,20 @@
+- block:
+  - name: "Debug info"
+    debug:
+      msg: 
+        - "Processing peer configuration for: {{ item }}"  
+
+  - name: "Read client public key"
+    slurp:
+      src: "{{ wg_keys_dir }}/client_{{ item.name }}_public_key"
+    register: client_public_key
+
+  - name: Append peer config
+    blockinfile:
+      path: "/etc/wireguard/{{ vg_conf_name }}.conf"
+      insertafter: EOF
+      block: |
+        [Peer]
+        AllowedIPs = {{ item.ip }}/32
+        PublicKey = {{ client_public_key.content | b64decode }}
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
