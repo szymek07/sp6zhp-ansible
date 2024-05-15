@@ -5,6 +5,12 @@
     - debug:
         msg: "Sending WireGuard configuration to: {{ client_name }}"
 
+    - name: Install required packages
+      package:
+        name:
+          - qrencode
+        state: latest
+
     - name: Send configuration
       include_tasks: subtasks/send-client-config.yaml
       loop: "{{ clients }}"
