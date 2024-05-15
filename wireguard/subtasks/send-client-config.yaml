@@ -12,10 +12,14 @@
     changed_when: false
     register: qrcode
 
+  - name: Debug QR
+    debug:
+      var: qrcode
+
   - name: Show QR codes
     debug:
       msg: "{{ item.name }}"
-    loop: "{{ qrcode.results }}"
+    loop: "{{ qrcode.lines }}"
 
 
   - name: Sending an email using Ansible
