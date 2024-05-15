@@ -33,7 +33,7 @@
         - "/tmp/{{ item.name }}/{{ vg_conf_name }}.conf"
 
   - name: Cleanup
-    shell: "rm -f /tmp/{{ item.name }}"
+    shell: "rm -rf /tmp/{{ item.name }}"
 
   - name: "Debug info"
     debug:
