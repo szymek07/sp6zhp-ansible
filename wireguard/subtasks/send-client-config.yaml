@@ -18,8 +18,8 @@
 
   - name: Show QR codes
     debug:
-      msg: "{{ item.name }}"
-    loop: "{{ qrcode.lines }}"
+      msg: "{{ item }}"
+    loop: "{{ qrcode.stdout_lines }}"
 
 
   - name: Sending an email using Ansible
@@ -33,6 +33,7 @@
       body:
         - Cześć,
         - poniżej znajdziesz Twoją konfigurację WireGuard.
+        - {{ qrcode.stdout_lines }}
       attach:
         - "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
 
