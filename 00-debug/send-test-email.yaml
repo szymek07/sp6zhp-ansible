@@ -1,0 +1,14 @@
+- name: Test connection and check sudo
+  hosts: all
+  tasks:
+    - name: Sending an email using Ansible
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ email_login}}"
+        password: "{{ email_pass }}"
+        to: "{{ email_recipient }}"
+        subject: Email By Ansible
+        body: Test successful
+      delegate_to: localhost
+    - debug:
