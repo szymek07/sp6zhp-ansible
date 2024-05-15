@@ -7,15 +7,24 @@
 #  - name: Generate QR code for {{ item.name }}
 #    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
 
+#  - name: Generate QR codes
+#    shell: "qrencode -t ansiutf8 < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
+#    changed_when: false
+#    register: qrcode
+#
+#  - name: Debug QR
+#    debug:
+#      var: qrcode.stdout_lines
+
+
+  - name: Make required dirs
+    shell: "mkdir -p /tmp/{{ item.name }}"
+
   - name: Generate QR codes
-    shell: "qrencode -t ansiutf8 < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
-    changed_when: false
-    register: qrcode
+    shell: "qrencode -t png -o /tmp/{{ item.name }}/wg-qrcode.png < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
 
-  - name: Debug QR
-    debug:
-      var: qrcode.stdout_lines
-
+  - name: Copy config to tmp
+    shell: "cp {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf /tmp/{{ item.name }}/{{ vg_conf_name }}.conf"
 
   - name: Sending an email using Ansible
     mail:
@@ -26,16 +35,21 @@
       to: "{{ item.email }}"
       subject: SP6ZHP WireGuard
       body: |
-        '
         Cześć,
         poniżej znajdziesz Twoją konfigurację WireGuard.
+        
         {% for line in qrcode.stdout_lines %}
           {{ line }}
         {% endfor %}
-        '
-      attach:
-        - "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
+        
 
+      attach:
+        - "/tmp/{{ item.name }}/wg-qrcode.png"
+        - "/tmp/{{ item.name }}/{{ vg_conf_name }}.conf"
+
+
+#  - name: Cleanup
+#    shell: "rm -f /tmp/{{ item.name }}"
 
   - name: "Debug info"
     debug:
