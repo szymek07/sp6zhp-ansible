@@ -38,9 +38,9 @@
         Cześć,
         poniżej znajdziesz Twoją konfigurację WireGuard.
         
-        {% for line in qrcode.stdout_lines %}
-          {{ line }}
-        {% endfor %}
+#        {% for line in qrcode.stdout_lines %}
+#          {{ line }}
+#        {% endfor %}
         
 
       attach:
