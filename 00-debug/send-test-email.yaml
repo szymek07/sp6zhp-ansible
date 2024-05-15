@@ -1,5 +1,6 @@
 - name: Test connection and check sudo
   hosts: all
+  vars_files: ../vars/secrets.yaml
   tasks:
     - name: Sending an email using Ansible
       mail:
