@@ -4,8 +4,19 @@
       msg: 
         - "Sending configuration for: {{ item.name }}"
 
-  - name: Generate QR code for {{ item.name }}
-    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
+#  - name: Generate QR code for {{ item.name }}
+#    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
+
+  - name: Generate QR codes
+    shell: qrencode -t ansiutf8 < "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf "
+    changed_when: false
+    register: qrcode
+
+  - name: Show QR codes
+    debug:
+      msg: "{{ item.name }}"
+    loop: "{{ qrcode.results }}"
+
 
   - name: "Debug info"
     debug:
