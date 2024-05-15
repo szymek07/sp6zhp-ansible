@@ -8,7 +8,7 @@
 #    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
 
   - name: Generate QR codes
-    shell: qrencode -t ansiutf8 < "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf "
+    shell: "qrencode -t ansiutf8 < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
     changed_when: false
     register: qrcode
 
@@ -16,6 +16,21 @@
     debug:
       msg: "{{ item.name }}"
     loop: "{{ qrcode.results }}"
+
+
+  - name: Sending an email using Ansible
+    mail:
+      host: smtp.gmail.com
+      port: 587
+      username: "{{ email_login }}"
+      password: "{{ email_pass }}"
+      to: "{{ item.email }}"
+      subject: SP6ZHP WireGuard
+      body:
+        - Cześć,
+        - poniżej znajdziesz Twoją konfigurację WireGuard.
+      attach:
+        - "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
 
 
   - name: "Debug info"
