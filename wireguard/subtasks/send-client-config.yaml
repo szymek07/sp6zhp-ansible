@@ -2,12 +2,15 @@
   - name: "Debug info"
     debug:
       msg: 
-        - "Sending configuration for: {{ item }}"
+        - "Sending configuration for: {{ item.name }}"
+
+  - name: Generate QR code for {{ item.name }}
+    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
 
   - name: "Debug info"
     debug:
       msg:
-        - "Configuration for: {{ item }} sent"
+        - "Configuration for {{ item.name }} sent to email: {{ item.email }}.."
 
 
 
