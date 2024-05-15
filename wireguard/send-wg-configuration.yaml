@@ -1,0 +1,13 @@
+- name: Send WireGuard configuration to user
+  hosts: all
+  tasks:
+    - debug:
+        msg: "Sending WireGuard configuration to: {{ client_name }}"
+
+    - name: Send configuration
+      include_tasks: subtasks/send-client-config.yaml
+      loop: "{{ clients }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: item.name == client_name
+
