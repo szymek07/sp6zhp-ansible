@@ -4,19 +4,6 @@
       msg: 
         - "Sending configuration for: {{ item.name }}"
 
-#  - name: Generate QR code for {{ item.name }}
-#    shell: "qrencode -t ansiutf8  < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf  > {{ wg_peer_conf_dir }}/client_{{ item.name }}-qr-full"
-
-#  - name: Generate QR codes
-#    shell: "qrencode -t ansiutf8 < {{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
-#    changed_when: false
-#    register: qrcode
-#
-#  - name: Debug QR
-#    debug:
-#      var: qrcode.stdout_lines
-
-
   - name: Make required dirs
     shell: "mkdir -p /tmp/{{ item.name }}"
 
@@ -36,28 +23,19 @@
       subject: SP6ZHP WireGuard
       body: |
         Cześć,
-        poniżej znajdziesz Twoją konfigurację WireGuard.
         
-#        {% for line in qrcode.stdout_lines %}
-#          {{ line }}
-#        {% endfor %}
+        w załączeniu znajdziesz Twoją konfigurację WireGuard.
         
-
+        Czuwaj
+        SP6ZHP
       attach:
         - "/tmp/{{ item.name }}/wg-qrcode.png"
         - "/tmp/{{ item.name }}/{{ vg_conf_name }}.conf"
 
-
-#  - name: Cleanup
-#    shell: "rm -f /tmp/{{ item.name }}"
+  - name: Cleanup
+    shell: "rm -f /tmp/{{ item.name }}"
 
   - name: "Debug info"
     debug:
       msg:
-        - "Configuration for {{ item.name }} sent to email: {{ item.email }}.."
-
-
-
-
-
-  
+        - "Configuration for {{ item.name }} sent to email: {{ item.email }}"
