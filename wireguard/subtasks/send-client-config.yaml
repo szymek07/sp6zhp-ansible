@@ -14,12 +14,7 @@
 
   - name: Debug QR
     debug:
-      var: qrcode
-
-  - name: Show QR codes
-    debug:
-      msg: "{{ item }}"
-    loop: "{{ qrcode.stdout_lines }}"
+      var: qrcode.stdout_lines
 
 
   - name: Sending an email using Ansible
@@ -30,10 +25,14 @@
       password: "{{ email_pass }}"
       to: "{{ item.email }}"
       subject: SP6ZHP WireGuard
-      body:
-        - "Cześć,"
-        - "poniżej znajdziesz Twoją konfigurację WireGuard."
-        - "{{ qrcode.stdout_lines }}"
+      body: |
+        '
+        Cześć,
+        poniżej znajdziesz Twoją konfigurację WireGuard.
+        {% for line in qrcode.stdout_lines %}
+          {{ line }}
+        {% endfor %}
+        '
       attach:
         - "{{ wg_peer_conf_dir }}/client_{{ item.name }}.conf"
 
