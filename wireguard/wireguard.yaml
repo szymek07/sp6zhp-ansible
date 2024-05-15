@@ -1,13 +1,6 @@
 - name: Install and configure WireGuard server
   hosts: all
-  vars:
-    server_address: "10.147.17.2/24"
-    server_port: 51820
-    peer_networks: "10.147.17.0/24"
-    server_iface_name: "eth0"
-    
-    wg_keys_dir: "/etc/wireguard/keys"
-    wg_peer_conf_dir: "/etc/wireguard/peers"
+  vars_files: vars/wg-vars.yaml
   tasks:
 
     - name: Fail if server_endpoint is undefined
