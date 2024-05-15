@@ -16,6 +16,8 @@ services:
     ports:
       - "3000:3000"
     image: semaphoreui/semaphore:latest
+    extra_hosts:
+       - "host.docker.internal:host-gateway"
     environment:
       SEMAPHORE_DB_USER: "semaphore"
       SEMAPHORE_DB_PASS: "${DB_PASS}"
