@@ -19,7 +19,7 @@
     - name: Show user info
       debug:
         msg:
-          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
+          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ docker_stacks_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
           - "MQTT data will be placed in {{ mqtt_base_dir }}."
 
     - name: Install httpie
