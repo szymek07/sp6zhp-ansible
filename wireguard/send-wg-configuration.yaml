@@ -2,7 +2,7 @@
   hosts: all
   vars_files:
     - vars/wg-vars.yaml
-    - ../vars/vault.yaml
+    - ../vars/email_vault.yaml
   tasks:
     - debug:
         msg: "Sending WireGuard configuration to: {{ client_name }}"
