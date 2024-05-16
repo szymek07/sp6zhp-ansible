@@ -1,0 +1,20 @@
+version: '3.2'
+
+services:
+    homeassistant:
+        image: ghcr.io/home-assistant/home-assistant:stable
+        volumes:
+          - /opt/homeassistant:/config
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /etc/localtime:/etc/localtime:ro
+        ports:
+          - "8123:8123"
+          - "8943:8943"
+        environment:
+          - TZ=Europe/Warsaw
+        healthcheck:
+          test: 'curl -m 90 -sLf http://localhost:8123 || date >> /config/healthcheck'
+          interval: 90s
+          timeout: 60s
+          retries: 2
+        restart: unless-stopped
