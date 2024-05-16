@@ -123,7 +123,7 @@
         X-API-Key:"{{ portainer_api_key }}"  \
         endpointId={{ endpoint_id }} \ 
         SwarmID="{{ swarm_id }}" \
-        Name="semaphore" \
+        Name="{{ semaphore_stack_name }}" \
         Env="[{\"name\": \"DB_PASS\", \"value\": \"{{ semaphore_db_pass }}\"}, {\"name\": \"SEM_ADM_PASS\", \"value\": \"{{ semaphore_admin_pass }}\"}, {\"name\": \"SEM_ENCR_KEY\", \"value\": \"{{ semaphore_access_key.stdout }}\"}]" \
         file@"{{ docker_stacks_dir | default('/tmp') }}/semaphore-compose.yaml"
       register: create_stack_response
