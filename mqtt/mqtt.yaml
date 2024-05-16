@@ -94,21 +94,25 @@
       file:
         path: "{{ mqtt_base_dir }}/config"
         state: directory
+      when: mqtt_deployed == "false"
 
     - name: Create mqtt data dir
       file:
         path: "{{ mqtt_base_dir }}/data"
         state: directory
+      when: mqtt_deployed == "false"
 
     - name: Create mqtt log dir
       file:
         path: "{{ mqtt_base_dir }}/log"
         state: directory
+      when: mqtt_deployed == "false"
 
     - name: Create docker stacks dir
       file:
         path: "{{ docker_stacks_dir  }}"
-        state: directory and docker_stacks_dir is not defined
+        state: directory
+      when: mqtt_deployed == "false" and docker_stacks_dir is defined
 
     - name: Create mqtt compose file
       template:
