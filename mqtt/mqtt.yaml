@@ -1,4 +1,4 @@
-- name: Install Ansible Semaphore
+- name: Install Apache Mosquito
   hosts: all
   vars_files:
     - ../vars/mqtt_users_vault.yaml
@@ -88,7 +88,7 @@
 
     - name: Mqtt status
       debug:
-        msg: "MQTT deployed: {{ semaphore_deployed }}"
+        msg: "MQTT deployed: {{ mqtt_deployed }}"
 
     - name: Create mqtt config dir
       file:
