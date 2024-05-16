@@ -1,0 +1,144 @@
+- name: Install Ansible Semaphore
+  hosts: all
+  vars_files:
+    - ../vars/mqtt_users_vault.yaml
+  vars:
+    mqtt_stack_name: "mqtt"
+    mqtt_deployed: "false"
+    docker_primary_env_name: "primary"
+  tasks:
+    - name: Fail if mqtt_base_dir is undefined
+      ansible.builtin.fail: msg="mqtt_base_dir is not defined. You should set it in playbook additional vars."
+      when: mqtt_base_dir is undefined
+
+    - name: Fail if portainer_api_key is undefined
+      ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
+      when: portainer_api_key is undefined
+
+
+    - name: Show user info
+      debug:
+        msg:
+          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ portainer_data_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
+          - "MQTT data will be placed in {{ mqtt_base_dir }}."
+
+    - name: Install httpie
+      apt:
+        pkg:
+          - httpie
+
+    - name: Get primary docker environment via portainer api
+      uri:
+        url: "https://127.0.0.1:9443/api/endpoints?name={{ docker_primary_env_name }}"
+        method: GET
+        headers:
+          X-API-Key: "{{ portainer_api_key }}"
+        validate_certs: false
+      register: endpoints_response
+
+    #    - name: Debug endpoints_response
+    #      debug:
+    #        var: endpoints_response
+
+    - name: Store endpoint Id
+      set_fact:
+        endpoint_id: "{{ endpoints_response.json[0].Id }}"
+
+    - name: Debug endpoint_id
+      debug:
+        var: endpoint_id
+
+    - name: Get Swarm ID
+      shell: |
+        {% raw %}
+        docker info --format '{{.Swarm.Cluster.ID}}'
+        {% endraw %}
+      register: swarm_id_output
+
+    #    - debug:
+    #        var: swarm_id_output
+
+    - name: Store Swarm Id
+      set_fact:
+        swarm_id: "{{ swarm_id_output.stdout }}"
+
+    - debug:
+        var: swarm_id
+
+    - name: Get deployed stacks
+      uri:
+        url: "https://127.0.0.1:9443/api/stacks"
+        method: GET
+        headers:
+          X-API-Key: "{{ portainer_api_key }}"
+        validate_certs: false
+      register: stacks_response
+
+    #    - name: Debug stacks_response
+    #      debug:
+    #        msg: "{{ stacks_response }}"
+
+    - name: Search for mqtt stack
+      set_fact:
+        mqtt_deployed: "true"
+      loop: "{{ stacks_response.json }}"
+      loop_control:
+        label: "{{ item.Name }}"
+      when: item.Name == mqtt_stack_name
+
+    - name: Mqtt status
+      debug:
+        msg: "MQTT deployed: {{ semaphore_deployed }}"
+
+    - name: Create mqtt config dir
+      file:
+        path: "{{ mqtt_base_dir }}/config"
+        state: directory
+
+    - name: Create mqtt data dir
+      file:
+        path: "{{ mqtt_base_dir }}/data"
+        state: directory
+
+    - name: Create mqtt log dir
+      file:
+        path: "{{ mqtt_base_dir }}/log"
+        state: directory
+
+    - name: Create docker stacks dir
+      file:
+        path: "{{ docker_stacks_dir  }}"
+        state: directory and docker_stacks_dir is not defined
+
+    - name: Create mqtt compose file
+      template:
+        src: mqtt-compose.yaml.j2
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/mqtt-compose.yaml"
+        output_encoding: "utf-8"
+      when: mqtt_deployed == "false"
+
+    - name: Create mqtt config file
+      template:
+        src: mosquitto.conf.j2
+        dest: "{{ mqtt_base_dir }}/config/mosquitto.conf"
+        output_encoding: "utf-8"
+      when: mqtt_deployed == "false"
+
+    - name: Create mqtt users file
+      template:
+        src: mqtt_users.j2
+        dest: "{{ mqtt_base_dir }}/config/mqtt_users"
+        output_encoding: "utf-8"
+      when: mqtt_deployed == "false"
+
+    - name: Deploy mqtt stack
+      shell: |
+        http --verify=no --form POST https://127.0.0.1:9443/api/stacks/create/swarm/file \
+        X-API-Key:"{{ portainer_api_key }}"  \
+        endpointId={{ endpoint_id }} \ 
+        SwarmID="{{ swarm_id }}" \
+        Name="{{ mqtt_stack_name }}" \
+        file@"{{ docker_stacks_dir | default('/tmp') }}/mqtt-compose.yaml"
+      register: create_stack_response
+      failed_when: "'message' in create_stack_response.stdout" #message text appears when stack is failed to deploy
+      when: mqtt_deployed == "false"

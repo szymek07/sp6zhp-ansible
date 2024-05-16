@@ -1,0 +1,21 @@
+version: '3.2'
+
+services:
+    mosquitto:
+        container_name: mqtt
+        image: eclipse-mosquitto:2.0
+        environment:
+            - TZ=Europe/Warsaw
+        healthcheck:
+            test: "mosquitto_sub -E -u {{ mqtt_user }} -P {{ mqtt_pass }} -t '#'"
+            interval: 60s
+            timeout: 10s
+            retries: 5
+        volumes:
+            - "{{ mqtt_base_dir }}/config:/mosquitto/config:ro"
+            - "{{ mqtt_base_dir }}/log:/mosquitto/log"
+            - "{{ mqtt_base_dir }}/data:/mosquitto/data"
+        ports:
+            - '1883:1883'
+            - '8883:8883'
+        restart: unless-stopped
