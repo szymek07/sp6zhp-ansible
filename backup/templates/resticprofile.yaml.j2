@@ -1,0 +1,34 @@
+version: "1"
+
+global:
+  log: "{{ restic_log_location }}/resticprofile.log"
+
+default:
+
+  status-file: "{{ restic_log_location }}/resticprfile-backup-status.json"
+
+  backup:
+    verbose: true
+    source:
+{% for location in locations_to_backup %}
+      - "{{ location.name }}"
+{% endfor %}
+    schedule: "{{ schedule }}"
+    schedule-permission: system
+    schedule-log: "{{ restic_log_location }}/resticprofile-scheduled-backup.log"
+    retention:
+      after-backup: true
+      keep-within: "{{ retention_keep_time }}"
+      prune: true
+    check:
+      read-data: true
+      schedule: "weekly"
+    run-before:
+      - 'echo "=== run-before backup in profile $PROFILE_NAME"'
+{% for mariabackup in maria_db_to_backup %}
+      - "{{ run_before_scripts_dir }}/{{ mariabackup.name }}.sh"
+{% endfor %}
+    run-after: 'echo "=== run-after backup in profile $PROFILE_NAME"'
+    run-after-fail: 'echo "=== ERROR in backup for profile ${PROFILE_NAME}: $ERROR_MESSAGE"'
+    run-finally: 'echo "=== run-finally after backup in profile $PROFILE_NAME"'
+

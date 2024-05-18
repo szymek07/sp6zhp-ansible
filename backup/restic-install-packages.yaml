@@ -1,8 +1,6 @@
 - name: Install and configure restic and resticprofile
   hosts: all
   vars_files: vars/restic-vars.yaml
-  vars:
-    restic_log_location: "/var/log/restic"
   tasks:
     - name: Check restic is installed
       shell: "which restic"

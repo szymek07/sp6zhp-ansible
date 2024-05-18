@@ -1,2 +1,3 @@
 restic_conf_dir: "/etc/restic"
 run_before_scripts_dir: "/etc/restic/run-before"
+restic_log_location: "/var/log/restic"

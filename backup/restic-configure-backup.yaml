@@ -2,23 +2,9 @@
   hosts: all
   vars_files: vars/restic-vars.yaml
   vars:
-    locations_to_backup:
-      - name: "/srv/cloudlog"
-      - name: "/srv/mqtt"
-      - name: "/etc"
-      - name: "/root"
-    schedule: "02:15"
+    schedule: "02:18"
     retention_keep_time: "30d"
-    podman_maria_db_to_backup:
-      - name: "cloudlog-db-dump"
-        backup_base_loc: "/srv/cloudlog/db_backup"
-        backup_fname: "_cloudlog_dump"
-        container_name: "cloudlog-db"
-        db_name: "cloudlog"
-        db_user: "cloudlog"
-        db_pass: "{{cloudlog_db_pass}}"
   tasks:
-
     - name: Initialize restic repo (if its not initialized)
       command: "restic init"
       when: check_restic_repo.rc != 0
@@ -27,23 +13,21 @@
       command: "resticprofile unschedule --all"
 
     - name: Generate scripts for mariadb backup
-      ansible.builtin.template:
+      template:
         src: templates/mariadb-container-backup.sh.j2
         dest: "{{ run_before_scripts_dir }}/{{ item.name }}.sh"
         mode: u=rwx
-      loop: "{{ podman_maria_db_to_backup }}"
+      loop: "{{ maria_db_to_backup }}"
       loop_control:
         label: "{{ item.name }}"
 
     - name: Generate restic profile configuration file
-      ansible.builtin.template:
+      template:
         src: templates/resticprofile.yaml.j2
         dest: "{{ restic_conf_dir}}/profiles.yaml"
 
     - name: Enable backup scheduler in systemd
       command: "resticprofile schedule --all"
-
-
 
 
 #  sudo rsync -avzh --progress --delete -e 'ssh -p 10287' root@srv08.mikr.us:/srv/restic_repo/ /mnt/restic_mikrus/restic_repo/

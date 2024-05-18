@@ -1,0 +1,11 @@
+#!/bin/bash
+
+data_string=$(date +%Y%m%d%H%M%S)
+backup_out_path="{{ item.backup_base_loc }}/$data_string"
+backup_out_path+="{{ item.backup_fname }}.sql"
+
+cloudlogdb_pid=`docker container ls | grep {{ item.container_name }} | awk '{print $1}'`
+echo "Znaleziony PID: $cloudlogdb_pid"
+
+docker exec -i "$cloudlogdb_pid" mariadb-dump {{ item.db_name }} -u{{ item.db_user }} -p'{{ item.db_pass }}' > "$backup_out_path"
+echo "Kopia zapasowa bazy danych {{ item.name }} została utworzona w pliku $backup_out_path."
