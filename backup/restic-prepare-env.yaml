@@ -13,6 +13,20 @@
           - "Restic repository location: {{ restic_repo_location }}"
           - "Restic repository password file {{ restic_repo_passwd_file_location }}"
 
+    - name: Ensure the parent directory exists
+      file:
+        path: "{{ restic_repo_passwd_file_location | dirname }}"
+        state: directory
+
+    - name: Extract directory path from file location
+      set_fact:
+        restic_repo_passwd_dir: "{{ restic_repo_passwd_file_location | dirname }}"
+
+    - name: debug
+      debug:
+        var: "{{ restic_repo_passwd_dir }}"
+
+
     - name: Create restic repo password file
       template:
         src: templates/restic_repo_passwd.j2
