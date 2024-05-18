@@ -8,4 +8,4 @@ cloudlogdb_pid=`docker container ls | grep {{ item.container_name }} | awk '{pri
 echo "Znaleziony PID: $cloudlogdb_pid"
 
 docker exec -i "$cloudlogdb_pid" mariadb-dump {{ item.db_name }} -u{{ item.db_user }} -p'{{ item.db_pass }}' > "$backup_out_path"
-echo "Kopia zapasowa bazy danych {{ item.name }} została utworzona w pliku $backup_out_path."
+echo "Kopia zapasowa bazy danych w kontenerze {{ item.name }} została utworzona w pliku $backup_out_path."

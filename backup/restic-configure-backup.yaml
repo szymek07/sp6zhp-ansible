@@ -18,9 +18,18 @@
       command: "resticprofile unschedule --all"
       ignore_errors: true
 
-    - name: Generate scripts for mariadb backup
+    - name: Generate scripts for mariadb container backup
       template:
         src: templates/mariadb-container-backup.sh.j2
+        dest: "{{ run_before_scripts_dir }}/{{ item.name }}.sh"
+        mode: u=rwx
+      loop: "{{ maria_db_container_to_backup }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Generate scripts for mariadb backup
+      template:
+        src: templates/mariadb-backup.sh.j2
         dest: "{{ run_before_scripts_dir }}/{{ item.name }}.sh"
         mode: u=rwx
       loop: "{{ maria_db_to_backup }}"

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+data_string=$(date +%Y%m%d%H%M%S)
+backup_out_path="{{ item.backup_base_loc }}/$data_string"
+backup_out_path+="{{ item.backup_fname }}.sql"
+
+docker run -it --rm mariadb:10 \
+   sh -c 'exec mariadb-dump -h"{{ item.db_host }" -P"{{ item.db_port }" -u"{{ item.db_user }}"" -p"{{ item.db_pass }}" {{ item.db_name }}' > "$backup_out_path"
+
+echo "Kopia zapasowa bazy danych {{ item.name }} została utworzona w pliku $backup_out_path."

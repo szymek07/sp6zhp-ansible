@@ -25,6 +25,9 @@ default:
       schedule: "weekly"
     run-before:
       - 'echo "=== run-before backup in profile $PROFILE_NAME"'
+{% for mariabackup in maria_db_container_to_backup %}
+      - "{{ run_before_scripts_dir }}/{{ mariabackup.name }}.sh"
+{% endfor %}
 {% for mariabackup in maria_db_to_backup %}
       - "{{ run_before_scripts_dir }}/{{ mariabackup.name }}.sh"
 {% endfor %}
