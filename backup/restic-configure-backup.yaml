@@ -16,6 +16,7 @@
 
     - name: Disable previous scheduler in systemd
       command: "resticprofile unschedule --all"
+      ignore_errors: true
 
     - name: Generate scripts for mariadb backup
       template:
