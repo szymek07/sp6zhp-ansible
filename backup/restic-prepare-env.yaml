@@ -1,0 +1,58 @@
+- name: Prepare env variables
+  hosts: all
+  vars_files:
+    - ../vars/restic_vault.yaml
+  vars:
+    restic_repo_location: "/srv/restic_repo"
+    restic_repo_passwd_file_location: "/etc/restic/restic_repo_passwd"
+  tasks:
+
+    - name: Show user info
+      debug:
+        msg:
+          - "Restic repository location: {{ restic_repo_location }}"
+          - "Restic repository password file {{ restic_repo_passwd_file_location }}"
+
+    - name: Create restic repo password file
+      template:
+        src: templates/restic_repo_passwd.j2
+        dest: "{{ restic_repo_passwd_file_location }}"
+        output_encoding: "utf-8"
+
+    - name: Create dir for restic repo
+      file:
+        path: "{{ restic_repo_location }}"
+        state: directory
+
+    - name: Check RESTIC_REPOSITORY exist in file /etc/environment
+      shell: grep -q '^RESTIC_REPOSITORY' /etc/environment
+      register: check_restic_repository_env
+      ignore_errors: true
+
+    - name: Add RESTIC_REPOSITORY to file /etc/environment
+      lineinfile:
+        path: /etc/environment
+        line: "RESTIC_REPOSITORY={{ restic_repo_location }}"
+        create: yes
+      when: check_restic_repository_env.rc != 0
+      notify:
+        - Reboot system
+
+    - name: Check RESTIC_PASSWORD_FILE exist in file /etc/environment
+      shell: grep -q '^RESTIC_PASSWORD_FILE' /etc/environment
+      register: check_restic_pass_env
+      ignore_errors: true
+
+    - name: Add RESTIC_PASSWORD_FILE to file /etc/environment
+      lineinfile:
+        path: /etc/environment
+        line: "RESTIC_PASSWORD_FILE={{ restic_repo_passwd_file_location }}"
+        create: yes
+      when: check_restic_pass_env.rc != 0
+      notify:
+        - Reboot system
+
+  handlers:
+    - name: Reboot system
+      fail:
+        msg: "Reboot system"

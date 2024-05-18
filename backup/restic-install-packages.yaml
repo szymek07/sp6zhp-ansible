@@ -1,0 +1,72 @@
+- name: Install and configure restic and resticprofile
+  hosts: all
+  vars_files: vars/restic-vars.yaml
+  vars:
+    restic_log_location: "/var/log/restic"
+  tasks:
+    - name: Check restic is installed
+      shell: "which restic"
+      register: restic_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display restic installation status
+      debug:
+        msg: "restic is {% if restic_check.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Install restic if not installed
+      package:
+        name: restic
+        state: present
+      when: restic_check.rc != 0
+
+    - name: Create subdir for restic conf
+      file:
+        path: "{{ restic_conf_dir  }}"
+        state: directory
+
+    - name: Create subdir for restic logs
+      file:
+        path: "{{ restic_log_location  }}"
+        state: directory
+
+    - name: Create subdir for run before scripts
+      file:
+        path: "{{ run_before_scripts_dir }}"
+        state: directory
+
+    - name: Check resticprofile is installed
+      shell: "which resticprofile"
+      register: resticprofile_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display resticprofile installation status
+      debug:
+        msg: "resticprofile is {% if resticprofile_check.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Download and install resticprofile
+      block:
+        - name: Download resticprofile installscript
+          shell: "curl -sfL https://raw.githubusercontent.com/creativeprojects/resticprofile/master/install.sh -o /tmp/install_resticprofile.sh"
+        - name: Add execute permission
+          shell: "chmod +x /tmp/install_resticprofile.sh"
+        - name: Install resticprofile
+          shell: "/tmp/install_resticprofile.sh -b /usr/local/bin"
+      when: resticprofile_check.rc != 0
+
+    - name: Check rsync is installed
+      shell: "which rsync"
+      register: rsync_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display rsync installation status
+      debug:
+        msg: "rsync is {% if rsync_check.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Install rsync if not installed
+      package:
+        name: rsync
+        state: present
+      when: rsync_check.rc != 0
