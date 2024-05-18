@@ -1,0 +1,10 @@
+- name: Change cloudlog environment to production
+  hosts: all
+  tasks:
+    - name: Change env
+      shell: 'docker exec -it `docker container ls | grep cloudlog-main | awk "{print $1}"` sed -i "s/define("ENVIRONMENT", "development")/define("ENVIRONMENT", "production")/g" index.php'
+      register: change
+
+    - name: Debug
+      debug:
+        var: change
