@@ -3,7 +3,7 @@
   vars_files:
     - ../vars/restic_vault.yaml
   vars:
-    restic_repo_location: "/srv/restic_repo"
+    restic_repo_location: "/storage/restic_repo"
     restic_repo_passwd_file_location: "/etc/restic/restic_repo_passwd"
   tasks:
 
