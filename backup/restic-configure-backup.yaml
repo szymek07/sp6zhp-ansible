@@ -5,6 +5,11 @@
     schedule: "02:18"
     retention_keep_time: "30d"
   tasks:
+    - name: Check restic repo is initialized
+      shell: restic check
+      register: check_restic_repo
+      ignore_errors: true
+
     - name: Initialize restic repo (if its not initialized)
       command: "restic init"
       when: check_restic_repo.rc != 0
