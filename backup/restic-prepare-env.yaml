@@ -24,8 +24,7 @@
 
     - name: debug
       debug:
-        var: "{{ restic_repo_passwd_dir }}"
-
+        var: restic_repo_passwd_dir
 
     - name: Create restic repo password file
       template:
