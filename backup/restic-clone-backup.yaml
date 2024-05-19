@@ -1,0 +1,32 @@
+- name: Backup restic repository
+  hosts: all
+  vars:
+    scripts_dir: "backup_scripts"
+    logs_dir: "logs"
+  tasks:
+    - name: Create subdir for backup base dir
+      file:
+        path: "{{ restic_backup_base_location  }}"
+        state: directory
+
+    - name: Create subdir for backup scripts
+      file:
+        path: "{{ restic_backup_base_location  }}/{{ scripts_dir }}"
+        state: directory
+
+    - name: Create subdir for backup logs
+      file:
+        path: "{{ restic_backup_base_location  }}/{{ logs_dir }}"
+        state: directory
+
+    - name: Install rsync
+      apt:
+        pkg:
+          - rsync
+
+    - name: Configure backup for {{ item.job_name }}
+      include_tasks: subtasks/restic-clone-backup-create-service.yaml
+      loop: "{{ restic_backup_jobs }}"
+      loop_control:
+        label: "{{ item.job_name }}"
+

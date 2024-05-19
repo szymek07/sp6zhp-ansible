@@ -1,0 +1,25 @@
+- block:
+  - name: "User info"
+    debug:
+      msg: 
+        - "Setup backup for {{ item.job_name }}"
+
+  - name: Generate timer service unit
+    template:
+      src: templates/systemd.timer.j2
+      dest: "/etc/systemd/system/{{ item.job_name }}.timer"
+
+  - name: Generate systemd service unit
+    template:
+      src: templates/systemd.service.j2
+      dest: "/etc/systemd/system/{{ item.job_name }}.service"
+
+  - name: Generate backup script for service
+    template:
+      src: templates/systemd.sh.j2
+      dest: "{{ restic_backup_base_location  }}/{{ scripts_dir }}/{{ item.job_name }}.sh"
+      mode: 0755
+
+#enable service
+
+  
