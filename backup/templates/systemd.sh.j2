@@ -1,7 +1,11 @@
 #!/bin/sh
 
+printf "{{ item.job_name }} - backup started $(date +%FT%r)\n" >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}.log
+
 BACKUP_SRC={{ item.src }}
 BACKUP_DST={{ restic_backup_base_location }}/{{ item.job_name }}
 EXTRA_ARGS="{{ item.args }}"
 
 rsync -avzh --delete -e "$EXTRA_ARGS" $BACKUP_SRC $BACKUP_DST >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}.log
+
+printf "{{ item.job_name }} - backup completed $(date +%FT%r)\n" >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}.log
