@@ -43,6 +43,3 @@
 
     - name: Enable backup scheduler in systemd
       command: "resticprofile schedule --all"
-
-
-#  sudo rsync -avzh --progress --delete -e 'ssh -p 10287' root@srv08.mikr.us:/srv/restic_repo/ /mnt/restic_mikrus/restic_repo/
