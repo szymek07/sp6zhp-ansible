@@ -20,6 +20,12 @@
       dest: "{{ restic_backup_base_location  }}/{{ scripts_dir }}/{{ item.job_name }}.sh"
       mode: 0755
 
-#enable service
+  - name: Enable and start service
+    systemd_service:
+      daemon_reload: true
+      state: started
+      enabled: true
+      name: "{{ item.job_name }}.timer"
+
 
   

@@ -4,4 +4,4 @@ BACKUP_SRC={{ item.src }}
 BACKUP_DST={{ restic_backup_base_location }}/{{ item.job_name }}
 EXTRA_ARGS="{{ item.args }}"
 
-rsync -avzh --progress --delete -e "$EXTRA_ARGS" $BACKUP_SRC $BACKUP_DST >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}.log
+rsync -avzh --delete -e "$EXTRA_ARGS" $BACKUP_SRC $BACKUP_DST >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}.log
