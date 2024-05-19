@@ -3,23 +3,18 @@
   vars_files:
     - ../vars/restic_vault.yaml
   vars:
-    restic_repo_location: "/storage/restic_repo"
     restic_repo_passwd_file_location: "/etc/restic/restic_repo_passwd"
   tasks:
+
+    - name: Fail if restic_repo_location is undefined
+      ansible.builtin.fail: msg="restic_repo_location is not defined. You should set it in playbook additional vars."
+      when: restic_repo_location is undefined
 
     - name: Show user info
       debug:
         msg:
           - "Restic repository location: {{ restic_repo_location }}"
           - "Restic repository password file {{ restic_repo_passwd_file_location }}"
-
-#    - name: Extract directory path from file location
-#      set_fact:
-#        restic_repo_passwd_dir: "{{ restic_repo_passwd_file_location | dirname }}"
-#
-#    - name: debug
-#      debug:
-#        var: restic_repo_passwd_dir
 
     - name: Ensure the parent directory exists
       file:
@@ -68,4 +63,4 @@
   handlers:
     - name: Reboot system
       fail:
-        msg: "Reboot system"
+        msg: "You should reboot your system now"
