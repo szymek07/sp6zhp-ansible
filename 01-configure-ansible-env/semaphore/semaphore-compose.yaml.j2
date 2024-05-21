@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     image: mariadb:11
     volumes:
-      - "{{ semaphore_db_dir }}:/var/lib/mysql"
+      - "semaphore_data:/var/lib/mysql"
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "semaphore"
@@ -33,3 +33,6 @@ services:
       SEMAPHORE_ACCESS_KEY_ENCRYPTION: "${SEM_ENCR_KEY}"
     depends_on:
       - db
+
+volumes:
+  semaphore_data:
