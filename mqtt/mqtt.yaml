@@ -7,20 +7,14 @@
     mqtt_deployed: "false"
     docker_primary_env_name: "primary"
   tasks:
-    - name: Fail if mqtt_base_dir is undefined
-      ansible.builtin.fail: msg="mqtt_base_dir is not defined. You should set it in playbook additional vars."
-      when: mqtt_base_dir is undefined
-
     - name: Fail if portainer_api_key is undefined
       ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
       when: portainer_api_key is undefined
-
 
     - name: Show user info
       debug:
         msg:
           - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ docker_stacks_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
-          - "MQTT data will be placed in {{ mqtt_base_dir }}."
 
     - name: Install httpie
       apt:
@@ -90,24 +84,6 @@
       debug:
         msg: "MQTT deployed: {{ mqtt_deployed }}"
 
-    - name: Create mqtt config dir
-      file:
-        path: "{{ mqtt_base_dir }}/config"
-        state: directory
-      when: mqtt_deployed == "false"
-
-    - name: Create mqtt data dir
-      file:
-        path: "{{ mqtt_base_dir }}/data"
-        state: directory
-      when: mqtt_deployed == "false"
-
-    - name: Create mqtt log dir
-      file:
-        path: "{{ mqtt_base_dir }}/log"
-        state: directory
-      when: mqtt_deployed == "false"
-
     - name: Create docker stacks dir
       file:
         path: "{{ docker_stacks_dir  }}"
@@ -121,19 +97,19 @@
         output_encoding: "utf-8"
       when: mqtt_deployed == "false"
 
-    - name: Create mqtt config file
-      template:
-        src: mosquitto.conf.j2
-        dest: "{{ mqtt_base_dir }}/config/mosquitto.conf"
-        output_encoding: "utf-8"
-      when: mqtt_deployed == "false"
+#    - name: Create mqtt config file
+#      template:
+#        src: mosquitto.conf.j2
+#        dest: "{{ mqtt_base_dir }}/config/mosquitto.conf"
+#        output_encoding: "utf-8"
+#      when: mqtt_deployed == "false"
 
-    - name: Create mqtt users file
-      template:
-        src: mqtt_users.j2
-        dest: "{{ mqtt_base_dir }}/config/mqtt_users"
-        output_encoding: "utf-8"
-      when: mqtt_deployed == "false"
+#    - name: Create mqtt users file
+#      template:
+#        src: mqtt_users.j2
+#        dest: "{{ mqtt_base_dir }}/config/mqtt_users"
+#        output_encoding: "utf-8"
+#      when: mqtt_deployed == "false"
 
     - name: Deploy mqtt stack
       shell: |
