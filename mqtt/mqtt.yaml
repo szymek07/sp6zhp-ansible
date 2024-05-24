@@ -124,6 +124,10 @@
         {% endraw %}
       register: portainer_ps_output
 
+    - name: Debug
+      debug:
+        var: portainer_ps_output.stdout_lines
+
     - name: Print portainer container ID
       debug:
         msg: "Portainer container ID: {{ portainer_ps_output.stdout_lines }}"
