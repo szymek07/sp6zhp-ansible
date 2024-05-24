@@ -118,7 +118,10 @@
       when: mqtt_deployed == "false"
 
     - name: Find portainer container ID
-      command: 'docker ps --filter "name=portainer_portainer" --format "{{.ID}}"'
+      shell: |
+        {% raw %}
+        docker ps --filter "name=portainer_portainer" --format "{{.ID}}"
+        {% endraw %}
       register: portainer_ps_output
 
     - name: Print portainer container ID
