@@ -126,7 +126,7 @@
 
     - name: Debug
       debug:
-        var: portainer_ps_output.stdout_lines
+        var: portainer_ps_output
 
     - name: Print portainer container ID
       debug:
