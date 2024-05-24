@@ -90,6 +90,12 @@
         state: directory
       when: mqtt_deployed == "false" and docker_stacks_dir is defined
 
+    - name: Create dir for stack additional files
+      file:
+        path: "{{ docker_stacks_dir | default('/tmp') }}/additional_files"
+        state: directory
+      when: mqtt_deployed == "false"
+
     - name: Create mqtt compose file
       template:
         src: mqtt-compose.yaml.j2
@@ -100,16 +106,19 @@
     - name: Create mqtt config file
       template:
         src: mqtt.conf.j2
-        dest: "{{ docker_stacks_dir | default('/tmp') }}/mqtt.conf"
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/mqtt.conf"
         output_encoding: "utf-8"
       when: mqtt_deployed == "false"
 
     - name: Create mqtt users file
       template:
         src: mqtt_users.j2
-        dest: "{{ docker_stacks_dir | default('/tmp') }}/mqtt_users"
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/mqtt_users"
         output_encoding: "utf-8"
       when: mqtt_deployed == "false"
+
+#TODO
+#    docker cp to container: docker cp additional_files/ 0132ae483b91:/data/
 
     - name: Deploy mqtt stack
       shell: |
@@ -125,10 +134,10 @@
 
     - name: Remove mqtt config file
       file:
-        path: "{{ docker_stacks_dir | default('/tmp') }}/mqtt.conf"
+        path: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/mqtt.conf"
         state: absent
 
     - name: Remove mqtt users file
       file:
-        path: "{{ docker_stacks_dir | default('/tmp') }}/mqtt_users"
+        path: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/mqtt_users"
         state: absent

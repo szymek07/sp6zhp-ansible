@@ -27,11 +27,11 @@ services:
 
 configs:
   mosquito_conf:
-    file: /srv/docker-compose/mqtt.conf
+    file: /data/additional_files/mqtt.conf
 
 secrets:
   mqtt_users:
-    file: /srv/docker-compose/mqtt_users
+    file: /data/additional_files/mqtt_users
 
 volumes:
   mqtt_logs:
