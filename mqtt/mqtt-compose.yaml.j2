@@ -21,7 +21,9 @@ services:
     ports:
       - '1883:1883'
       - '8883:8883'
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
 
 configs:
   mosquito_conf:
