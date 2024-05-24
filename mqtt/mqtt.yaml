@@ -124,16 +124,16 @@
         {% endraw %}
       register: portainer_ps_output
 
-    - name: Debug
-      debug:
-        var: portainer_ps_output
+#    - name: Debug
+#      debug:
+#        var: portainer_ps_output
 
     - name: Print portainer container ID
       debug:
-        msg: "Portainer container ID: {{ portainer_ps_output.stdout_lines }}"
+        msg: "Portainer container ID: {{ portainer_ps_output.stdout }}"
 
     - name: Copy additional files to portainer container
-      command: "docker cp {{ docker_stacks_dir | default('/tmp') }}/additional_files/ {{ portainer_ps_output.stdout_lines }}:/data/"
+      command: "docker cp {{ docker_stacks_dir | default('/tmp') }}/additional_files/ {{ portainer_ps_output.stdout }}:/data/"
 
     - name: Deploy mqtt stack
       shell: |
