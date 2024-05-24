@@ -1,7 +1,7 @@
 - name: Install uptime-kuma
   hosts: all
   vars:
-    uptime_stack_name: "uptime-kuma"
+    uptime_stack_name: "uptime_kuma"
     uptime_deployed: "false"
     docker_primary_env_name: "primary"
   tasks:
