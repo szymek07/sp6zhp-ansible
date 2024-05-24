@@ -117,8 +117,16 @@
         output_encoding: "utf-8"
       when: mqtt_deployed == "false"
 
-#TODO
-#    docker cp to container: docker cp additional_files/ 0132ae483b91:/data/
+    - name: Find portainer container ID
+      command: 'docker ps --filter "name=portainer_portainer" --format "{{.ID}}"'
+      register: portainer_ps_output
+
+    - name: Print portainer container ID
+      debug:
+        msg: "Portainer container ID: {{ portainer_ps_output.stdout_lines }}"
+
+    - name: Copy additional files to portainer container
+      command: "docker cp additional_files/ {{ portainer_ps_output.stdout_lines }}:/data/"
 
     - name: Deploy mqtt stack
       shell: |
