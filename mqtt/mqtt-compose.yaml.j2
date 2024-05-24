@@ -1,49 +1,37 @@
-version: '3.2'
+version: '3.9'
 
 services:
-    mosquitto:
-        container_name: mqtt
-        image: eclipse-mosquitto:2.0
-        environment:
-            - TZ=Europe/Warsaw
-        healthcheck:
-            test: "mosquitto_sub -E -u {{ mqtt_user }} -P {{ mqtt_pass }} -t '#'"
-            interval: 60s
-            timeout: 10s
-            retries: 5
-        configs:
-            - source: mosquito_conf
-              target: /mosquitto/config/mosquitto.conf
-            - source: mqtt_users
-              target: /mosquitto/config/mqtt_users
-        volumes:
-            - "mqtt_logs:/mosquitto/log"
-            - "mqtt_data:/mosquitto/data"
-        ports:
-            - '1883:1883'
-            - '8883:8883'
-        restart: unless-stopped
+  mosquitto:
+    container_name: mqtt
+    image: eclipse-mosquitto:2.0
+    environment:
+      - TZ=Europe/Warsaw
+    healthcheck:
+      test: "mosquitto_sub -E -u {{ mqtt_user }} -P {{ mqtt_pass }} -t '#'"
+      interval: 60s
+      timeout: 10s
+      retries: 5
+    configs:
+      - source: mosquito_conf
+        target: /mosquitto/config/mosquitto.conf
+    secrets:
+      - mqtt_users
+    volumes:
+      - "mqtt_logs:/mosquitto/log"
+      - "mqtt_data:/mosquitto/data"
+    ports:
+      - '1883:1883'
+      - '8883:8883'
+    restart: unless-stopped
 
 configs:
-    mosquito_conf:
-        content: |
-            per_listener_settings true
-            listener 1883
-            allow_anonymous false
-            password_file /mosquitto/config/mqtt_users
+  mosquito_conf:
+    file: /srv/docker-compose/mqtt.conf
 
-            persistence true
-            persistence_location /mosquitto/data/
-
-            log_dest stdout
-            log_dest file /mosquitto/log/mosquitto.log
-            log_timestamp true
-            log_timestamp_format %Y-%m-%dT%H:%M:%S
-
-    mqtt_users:
-        content: |
-            "{{ mqtt_users_file }}"
+secrets:
+  mqtt_users:
+    file: /srv/docker-compose/mqtt_users
 
 volumes:
-    mqtt_logs:
-    mqtt_data:
+  mqtt_logs:
+  mqtt_data:

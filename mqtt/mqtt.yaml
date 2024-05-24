@@ -97,19 +97,19 @@
         output_encoding: "utf-8"
       when: mqtt_deployed == "false"
 
-#    - name: Create mqtt config file
-#      template:
-#        src: mosquitto.conf.j2
-#        dest: "{{ mqtt_base_dir }}/config/mosquitto.conf"
-#        output_encoding: "utf-8"
-#      when: mqtt_deployed == "false"
+    - name: Create mqtt config file
+      template:
+        src: mqtt.conf.j2
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/mqtt.conf"
+        output_encoding: "utf-8"
+      when: mqtt_deployed == "false"
 
-#    - name: Create mqtt users file
-#      template:
-#        src: mqtt_users.j2
-#        dest: "{{ mqtt_base_dir }}/config/mqtt_users"
-#        output_encoding: "utf-8"
-#      when: mqtt_deployed == "false"
+    - name: Create mqtt users file
+      template:
+        src: mqtt_users.j2
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/mqtt_users"
+        output_encoding: "utf-8"
+      when: mqtt_deployed == "false"
 
     - name: Deploy mqtt stack
       shell: |
@@ -122,3 +122,13 @@
       register: create_stack_response
       failed_when: "'message' in create_stack_response.stdout" #message text appears when stack is failed to deploy
       when: mqtt_deployed == "false"
+
+    - name: Remove mqtt config file
+      file:
+        path: "{{ docker_stacks_dir | default('/tmp') }}/mqtt.conf"
+        state: absent
+
+    - name: Remove mqtt users file
+      file:
+        path: "{{ docker_stacks_dir | default('/tmp') }}/mqtt_users"
+        state: absent
