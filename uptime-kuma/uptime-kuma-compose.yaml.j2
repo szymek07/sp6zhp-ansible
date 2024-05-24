@@ -1,16 +1,15 @@
 version: "3"
 services:
-    uptime-kuma:
-        container_name: uptime-kuma
-        image: louislam/uptime-kuma:1
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
-        ports:
-            - 3001:3001
-        volumes:
-            - {{ uptime_kuma_base_dir }}:/app/data
-        restart: unless-stopped
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: louislam/uptime-kuma:1.23.13
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - 3001:3001
+    volumes:
+      - uptime_kuma:/app/data
+    restart: unless-stopped
+
 volumes:
-    uptime-kuma:
-        external:
-            name: uptime-kuma
+  uptime-kuma:

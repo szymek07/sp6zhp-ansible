@@ -5,10 +5,6 @@
     uptime_deployed: "false"
     docker_primary_env_name: "primary"
   tasks:
-    - name: Fail if uptime_kuma_base_dir is undefined
-      ansible.builtin.fail: msg="uptime_kuma_base_dir is not defined. You should set it in playbook additional vars."
-      when: uptime_kuma_base_dir is undefined
-
     - name: Fail if portainer_api_key is undefined
       ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
       when: portainer_api_key is undefined
@@ -17,7 +13,6 @@
       debug:
         msg:
           - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ docker_stacks_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
-          - "uptime-kuma data will be placed in {{ uptime_kuma_base_dir }}."
 
     - name: Install httpie
       apt:
@@ -86,12 +81,6 @@
     - name: Uptime-kuma status
       debug:
         msg: "uptime-kuma deployed: {{ uptime_deployed }}"
-
-    - name: Create uptime-kuma base dir
-      file:
-        path: "{{ uptime_kuma_base_dir }}"
-        state: directory
-      when: uptime_deployed == "false"
 
     - name: Create docker stacks dir
       file:
