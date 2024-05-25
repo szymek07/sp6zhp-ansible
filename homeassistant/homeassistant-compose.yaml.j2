@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3.9'
 
 services:
     homeassistant:
@@ -6,7 +6,7 @@ services:
         extra_hosts:
           - "host.docker.internal:host-gateway"
         volumes:
-          - "{{ homeassistant_base_dir }}:/config"
+          - homeassistant:/config
           - /var/run/docker.sock:/var/run/docker.sock
           - /etc/localtime:/etc/localtime:ro
         ports:
@@ -20,3 +20,7 @@ services:
           timeout: 60s
           retries: 2
         restart: unless-stopped
+
+volumes:
+  homeassistant:
+
