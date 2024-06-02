@@ -5,7 +5,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - 3001:3001
+      - target: 3001
+        published: 3001
+        mode: host
     volumes:
       - uptime_kuma:/app/data
     deploy:

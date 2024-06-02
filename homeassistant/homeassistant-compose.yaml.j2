@@ -10,8 +10,12 @@ services:
           - /var/run/docker.sock:/var/run/docker.sock
           - /etc/localtime:/etc/localtime:ro
         ports:
-          - "8123:8123"
-          - "8943:8943"
+          - target: 8123
+            published: 8123
+            mode: host
+          - target: 8943
+            published: 8943
+            mode: host
         environment:
           - TZ=Europe/Warsaw
         healthcheck:

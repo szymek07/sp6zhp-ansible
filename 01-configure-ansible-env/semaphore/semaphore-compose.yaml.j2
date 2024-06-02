@@ -14,7 +14,9 @@ services:
   semaphore:
     restart: unless-stopped
     ports:
-      - "2999:3000"
+      - target: 3000
+        published: 2999
+        mode: host
     image: semaphoreui/semaphore:latest
     extra_hosts:
        - "host.docker.internal:host-gateway"

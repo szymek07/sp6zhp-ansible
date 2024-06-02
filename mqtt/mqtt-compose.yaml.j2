@@ -19,8 +19,12 @@ services:
       - "mqtt_logs:/mosquitto/log"
       - "mqtt_data:/mosquitto/data"
     ports:
-      - '1883:1883'
-      - '8883:8883'
+      - target: 1883
+        published: 1883
+        mode: host
+      - target: 8883
+        published: 8883
+        mode: host
     deploy:
       restart_policy:
         condition: on-failure
