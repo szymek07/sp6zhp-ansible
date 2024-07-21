@@ -87,7 +87,8 @@
     - name: Create docker stacks dir
       file:
         path: "{{ docker_stacks_dir  }}"
-        state: directory and docker_stacks_dir is not defined
+        state: directory 
+      when: docker_stacks_dir is defined
 
     - name: Create compose file
       template:
