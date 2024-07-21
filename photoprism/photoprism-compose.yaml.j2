@@ -76,3 +76,9 @@ services:
       MARIADB_USER: "photoprism"
       MARIADB_PASSWORD: "${PHOTOPRISM_DATABASE_PASSWORD}"
       MARIADB_ROOT_PASSWORD: "${PHOTOPRISM_DATABASE_ROOT_PASSWORD}"
+
+volumes:
+  photoprism_database:
+  photoprism_storage:
+  photoprism_originals:
+
