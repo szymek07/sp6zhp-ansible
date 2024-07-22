@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:v0.9.5
+    environment:
+      - TZ=Europe/Warsaw
+    ports:
+      - target: 3000
+        published: 80
+        mode: host
+    configs:
+      - source: settings_yaml
+        target: /app/config/settings.yaml
+      - source: services_yaml
+        target: /app/config/services.yaml
+      - source: docker_yaml
+        target: /app/config/docker.yaml
+      - source: bookmarks_yaml
+        target: /app/config/bookmarks.yaml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+configs:
+  settings_yaml:
+    file: /data/additional_files/settings.yaml
+  services_yaml:
+    file: /data/additional_files/services.yaml
+  docker_yaml:
+    file: /data/additional_files/docker.yaml
+  bookmarks_yaml:
+    file: /data/additional_files/bookmarks.yaml
+

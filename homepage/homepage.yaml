@@ -1,11 +1,9 @@
-- name: Install Photoprism
+- name: Install HOMEPAGE
   hosts: all
   vars:
-    stack_name: "photoprism"
+    stack_name: "mqtt"
     stack_deployed: "false"
     docker_primary_env_name: "primary"
-  vars_files:
-    - ../vars/photoprism_vault.yaml
   tasks:
     - name: Fail if portainer_api_key is undefined
       ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
@@ -30,9 +28,9 @@
         validate_certs: false
       register: endpoints_response
 
-#    - name: Debug endpoints_response
-#      debug:
-#        var: endpoints_response
+    #    - name: Debug endpoints_response
+    #      debug:
+    #        var: endpoints_response
 
     - name: Store endpoint Id
       set_fact:
@@ -49,8 +47,8 @@
         {% endraw %}
       register: swarm_id_output
 
-#    - debug:
-#        var: swarm_id_output
+    #    - debug:
+    #        var: swarm_id_output
 
     - name: Store Swarm Id
       set_fact:
@@ -68,9 +66,9 @@
         validate_certs: false
       register: stacks_response
 
-#    - name: Debug stacks_response
-#      debug:
-#        msg: "{{ stacks_response }}"
+    #    - name: Debug stacks_response
+    #      debug:
+    #        msg: "{{ stacks_response }}"
 
     - name: Search for stack
       set_fact:
@@ -87,15 +85,51 @@
     - name: Create docker stacks dir
       file:
         path: "{{ docker_stacks_dir  }}"
-        state: directory 
+        state: directory
       when: stack_deployed == "false" and docker_stacks_dir is defined
+
+    - name: Create dir for stack additional files
+      file:
+        path: "{{ docker_stacks_dir | default('/tmp') }}/additional_files"
+        state: directory
+      when: stack_deployed == "false"
 
     - name: Create compose file
       template:
-        src: photoprism-compose.yaml.j2
-        dest: "{{ docker_stacks_dir | default('/tmp') }}/photoprism-compose.yaml"
+        src: homepage-compose.yaml.j2
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/homepage-compose.yaml"
         output_encoding: "utf-8"
       when: stack_deployed == "false"
+
+    - name: Create settings config file
+      template:
+        src: "{{ item }}.j2"
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/{{ item }}"
+        output_encoding: "utf-8"
+      loop:
+        - settings.yaml
+        - services.yaml
+        - docker.yaml
+        - bookmarks.yaml
+      when: stack_deployed == "false"
+
+    - name: Find portainer container ID
+      shell: |
+        {% raw %}
+        docker ps --filter "name=portainer_portainer" --format "{{.ID}}"
+        {% endraw %}
+      register: portainer_ps_output
+
+#    - name: Debug
+#      debug:
+#        var: portainer_ps_output
+
+    - name: Print portainer container ID
+      debug:
+        msg: "Portainer container ID: {{ portainer_ps_output.stdout }}"
+
+    - name: Copy additional files to portainer container
+      command: "docker cp {{ docker_stacks_dir | default('/tmp') }}/additional_files/ {{ portainer_ps_output.stdout }}:/data/"
 
     - name: Deploy stack
       shell: |
@@ -104,9 +138,18 @@
         endpointId={{ endpoint_id }} \ 
         SwarmID="{{ swarm_id }}" \
         Name="{{ stack_name }}" \
-        Env="[{\"name\": \"PHOTOPRISM_ADMIN_PASSWORD\", \"value\": \"{{ photoprism_admin_password }}\"}, {\"name\": \"PHOTOPRISM_DATABASE_PASSWORD\", \"value\": \"{{ photoprism_database_password }}\"}, {\"name\": \"PHOTOPRISM_DATABASE_ROOT_PASSWORD\", \"value\": \"{{ photoprism_database_root_password }}\"}]" \
-        file@"{{ docker_stacks_dir | default('/tmp') }}/photoprism-compose.yaml"
+        file@"{{ docker_stacks_dir | default('/tmp') }}/homepage-compose.yaml"
       register: create_stack_response
       failed_when: "'message' in create_stack_response.stdout" #message text appears when stack is failed to deploy
       when: stack_deployed == "false"
+
+    - name: Remove config files
+      file:
+        path: "{{ docker_stacks_dir | default('/tmp') }}/additional_files/{{ item }}"
+        state: absent
+      loop:
+        - settings.yaml
+        - services.yaml
+        - docker.yaml
+        - bookmarks.yaml
 
