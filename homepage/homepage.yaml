@@ -119,6 +119,7 @@
         docker ps --filter "name=portainer_portainer" --format "{{.ID}}"
         {% endraw %}
       register: portainer_ps_output
+      when: stack_deployed == "false"
 
 #    - name: Debug
 #      debug:
@@ -127,9 +128,11 @@
     - name: Print portainer container ID
       debug:
         msg: "Portainer container ID: {{ portainer_ps_output.stdout }}"
+      when: stack_deployed == "false"
 
     - name: Copy additional files to portainer container
       command: "docker cp {{ docker_stacks_dir | default('/tmp') }}/additional_files/ {{ portainer_ps_output.stdout }}:/data/"
+      when: stack_deployed == "false"
 
     - name: Deploy stack
       shell: |
@@ -152,4 +155,5 @@
         - services.yaml
         - docker.yaml
         - bookmarks.yaml
+      when: stack_deployed == "false"
 
