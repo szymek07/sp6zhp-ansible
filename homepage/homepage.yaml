@@ -1,7 +1,7 @@
 - name: Install HOMEPAGE
   hosts: all
   vars:
-    stack_name: "mqtt"
+    stack_name: "homepage"
     stack_deployed: "false"
     docker_primary_env_name: "primary"
   tasks:
