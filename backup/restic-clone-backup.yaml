@@ -23,6 +23,7 @@
       apt:
         pkg:
           - rsync
+          - jq
 
     - name: Configure backup for {{ item.job_name }}
       include_tasks: subtasks/restic-clone-backup-create-service.yaml
