@@ -26,6 +26,7 @@
       loop: "{{ maria_db_container_to_backup }}"
       loop_control:
         label: "{{ item.name }}"
+      when: maria_db_container_to_backup is defined
 
     - name: Generate scripts for mariadb backup
       template:
@@ -35,6 +36,7 @@
       loop: "{{ maria_db_to_backup }}"
       loop_control:
         label: "{{ item.name }}"
+      when: maria_db_to_backup is defined
 
     - name: Generate restic profile configuration file
       template:
