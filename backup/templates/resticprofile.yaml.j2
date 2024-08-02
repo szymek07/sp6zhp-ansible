@@ -25,12 +25,16 @@ default:
       schedule: "weekly"
     run-before:
       - 'echo "=== run-before backup in profile $PROFILE_NAME"'
+{% if maria_db_container_to_backup is defined %}
 {% for mariabackup in maria_db_container_to_backup %}
       - "{{ run_before_scripts_dir }}/{{ mariabackup.name }}.sh"
 {% endfor %}
+{% endif %}
+{% if maria_db_to_backup is defined %}
 {% for mariabackup in maria_db_to_backup %}
       - "{{ run_before_scripts_dir }}/{{ mariabackup.name }}.sh"
 {% endfor %}
+{% endif %}
     run-after: 'echo "=== run-after backup in profile $PROFILE_NAME"'
     run-after-fail: 'echo "=== ERROR in backup for profile ${PROFILE_NAME}: $ERROR_MESSAGE"'
     run-finally: 'echo "=== run-finally after backup in profile $PROFILE_NAME"'
