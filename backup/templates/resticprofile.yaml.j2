@@ -13,6 +13,12 @@ default:
 {% for location in locations_to_backup %}
       - "{{ location.name }}"
 {% endfor %}
+{% if locations_to_exclude is defined %}
+    exclude:
+{% for location in locations_to_exclude %}
+      - "{{ location.name }}"
+{% endfor %}
+{% endif %}
     schedule: "{{ schedule }}"
     schedule-permission: system
     schedule-log: "{{ restic_log_location }}/resticprofile-scheduled-backup.log"
@@ -38,4 +44,7 @@ default:
     run-after: 'echo "=== run-after backup in profile $PROFILE_NAME"'
     run-after-fail: 'echo "=== ERROR in backup for profile ${PROFILE_NAME}: $ERROR_MESSAGE"'
     run-finally: 'echo "=== run-finally after backup in profile $PROFILE_NAME"'
+
+
+
 
