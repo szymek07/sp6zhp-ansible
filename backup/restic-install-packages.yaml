@@ -68,3 +68,19 @@
         name: rsync
         state: present
       when: rsync_check.rc != 0
+
+    - name: Check jq is installed
+      shell: "which jq"
+      register: jq_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display jq installation status
+      debug:
+        msg: "jq is {% if jq_check.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Install jq if not installed
+      package:
+        name: jq
+        state: present
+      when: jq_check.rc != 0
