@@ -35,7 +35,7 @@
       src: templates/systemd_monitoring.service.j2
       dest: "/etc/systemd/system/{{ item.job_name }}_monitoring.service"
 
-  - name: Generate backup script for service
+  - name: Generate script for service
     template:
       src: templates/systemd_monitoring.sh.j2
       dest: "{{ restic_backup_base_location  }}/{{ scripts_dir }}/{{ item.job_name }}_monitoring.sh"

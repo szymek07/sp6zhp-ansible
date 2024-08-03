@@ -2,7 +2,7 @@
 
 printf "\n---\n{{ item.job_name }}_monitoring - backup monitoring started $(date +%FT%r)\n" >> {{ restic_backup_base_location  }}/{{ logs_dir }}/{{ item.job_name }}_monitoring.log
 
-json_data=$({{ restic_status_file_content }})
+json_data=$({{ item.restic_status_file_content }})
 success=$(echo "$json_data" | jq -r '.profiles.default.backup.success')
 backup_time=$(echo "$json_data" | jq -r '.profiles.default.backup.time')
 duration=$(echo "$json_data" | jq -r '.profiles.default.backup.duration')
@@ -10,11 +10,11 @@ if [ "$success" = "true" ]; then
     backup_timestamp=$(date -d "$backup_time" +%s)
     current_timestamp=$(date +%s)
     time_difference=$((current_timestamp - backup_timestamp))
-    if [ "$time_difference" -le {{ max_age }} ]; then
-        echo "Backup was successful and is less than {{ max_age }}. Performing action..."
-	    curl "{{ uptime_kuma_url }}$(( duration * 1000 ))"
+    if [ "$time_difference" -le {{ item.max_age }} ]; then
+        echo "Backup was successful and is less than {{ item.max_age }}. Performing action..."
+	    curl "{{ item.uptime_kuma_url }}$(( duration * 1000 ))"
     else
-        echo "Backup is older than {{ max_age }}."
+        echo "Backup is older than {{ item.max_age }}."
     fi
 else
     echo "Backup was not successful."
