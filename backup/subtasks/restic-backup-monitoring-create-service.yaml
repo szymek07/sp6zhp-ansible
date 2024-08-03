@@ -23,7 +23,7 @@
         - "restic_status_file_content {{ item.restic_status_file_content }}"
         - "max_age {{ item.max_age }}"
         - "schedule_monitoring {{ item.schedule_monitoring }}"
-        - "uptime_kuma_url {{ uptime_kuma_url }}"
+        - "uptime_kuma_url {{ item.uptime_kuma_url }}"
 
   - name: Generate timer service unit
     template:
