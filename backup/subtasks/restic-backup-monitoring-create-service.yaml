@@ -1,0 +1,52 @@
+- block:
+
+  - name: Fail if item.restic_status_file_content is undefined
+    ansible.builtin.fail: msg="item.restic_status_file_content is not defined. You should set it in playbook additional vars."
+    when: item.restic_status_file_content is undefined
+
+  - name: Fail if item.max_age is undefined
+    ansible.builtin.fail: msg="item.max_age is not defined. You should set it in playbook additional vars."
+    when: item.max_age is undefined
+
+  - name: Fail if item.schedule_monitoring is undefined
+    ansible.builtin.fail: msg="item.schedule_monitoring is not defined. You should set it in playbook additional vars."
+    when: item.schedule_monitoring is undefined
+
+  - name: Fail if item.uptime_kuma_url is undefined
+    ansible.builtin.fail: msg="item.uptime_kuma_url is not defined. You should set it in playbook additional vars."
+    when: item.uptime_kuma_url is undefined
+
+  - name: "User info"
+    debug:
+      msg: 
+        - "Setup backup monitoring for {{ item.job_name }}"
+        - "restic_status_file_content {{ item.restic_status_file_content }}"
+        - "max_age {{ item.max_age }}"
+        - "schedule_monitoring {{ item.schedule_monitoring }}"
+        - "uptime_kuma_url {{ uptime_kuma_url }}"
+
+  - name: Generate timer service unit
+    template:
+      src: templates/systemd_monitoring.timer.j2
+      dest: "/etc/systemd/system/{{ item.job_name }}_monitoring.timer"
+
+  - name: Generate systemd service unit
+    template:
+      src: templates/systemd_monitoring.service.j2
+      dest: "/etc/systemd/system/{{ item.job_name }}_monitoring.service"
+
+  - name: Generate backup script for service
+    template:
+      src: templates/systemd_monitoring.sh.j2
+      dest: "{{ restic_backup_base_location  }}/{{ scripts_dir }}/{{ item.job_name }}_monitoring.sh"
+      mode: 0755
+
+  - name: Enable and start service
+    systemd_service:
+      daemon_reload: true
+      state: started
+      enabled: true
+      name: "{{ item.job_name }}_monitoring.timer"
+
+
+  

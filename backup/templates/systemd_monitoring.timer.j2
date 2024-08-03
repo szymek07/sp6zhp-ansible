@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer unit for {{ item.job_name }}_monitoring.service
+Requires={{ item.job_name }}_monitoring.service
+
+[Timer]
+Unit={{ item.job_name }}_monitoring.service
+OnCalendar={{ item.schedule_monitoring }}
+
+[Install]
+WantedBy=multi-user.target

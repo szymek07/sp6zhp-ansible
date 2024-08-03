@@ -1,0 +1,30 @@
+- name: Restic backup monitoring
+  hosts: all
+  vars:
+    scripts_dir: "backup_scripts"
+    logs_dir: "logs"
+  tasks:
+    - name: Fail if restic_backup_base_location is undefined
+      ansible.builtin.fail: msg="restic_backup_base_location is not defined. You should set it in playbook additional vars."
+      when: restic_backup_base_location is undefined
+
+    - name: Show user info
+      debug:
+        msg:
+          - "restic_backup_base_location: {{ restic_backup_base_location }}"
+
+    - name: Create subdir for backup base dir
+      file:
+        path: "{{ restic_backup_base_location  }}"
+        state: directory
+
+    - name: Create subdir for backup scripts
+      file:
+        path: "{{ restic_backup_base_location  }}/{{ scripts_dir }}"
+        state: directory
+
+    - name: Configure backup monitoring for {{ item.job_name }}
+      include_tasks: subtasks/restic-backup-monitoring-create-service.yaml
+      loop: "{{ restic_backup_jobs }}"
+      loop_control:
+        label: "{{ item.job_name }}"

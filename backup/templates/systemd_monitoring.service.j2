@@ -1,0 +1,10 @@
+[Unit]
+Description={{ item.job_name }}_monitoring
+Wants={{ item.job_name }}_monitoring.timer
+
+[Service]
+Type=oneshot
+ExecStart={{ restic_backup_base_location }}/{{ scripts_dir }}/{{ item.job_name }}_monitoring.sh
+
+[Install]
+WantedBy=multi-user.target
