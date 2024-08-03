@@ -4,6 +4,15 @@
     scripts_dir: "backup_scripts"
     logs_dir: "logs"
   tasks:
+    - name: Fail if restic_backup_base_location is undefined
+      ansible.builtin.fail: msg="restic_backup_base_location is not defined. You should set it in playbook additional vars."
+      when: restic_backup_base_location is undefined
+
+    - name: Show user info
+      debug:
+        msg:
+          - "restic_backup_base_location: {{ restic_backup_base_location }}"
+           
     - name: Create subdir for backup base dir
       file:
         path: "{{ restic_backup_base_location  }}"
