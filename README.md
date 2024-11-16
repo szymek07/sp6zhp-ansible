@@ -53,3 +53,15 @@ clients:
 peer_networks: "<comma_separated_networks>"
 server_iface_name: "<ethernet_interface_name>"
 ``
+
+
+## Ansible vault vars
+Create file contains key: val entry
+eg:
+key: val1
+key2: val2
+
+Encrypt with ansible-vault encrypt <filename>
+Decrypt with ansible-vault decrypt <filename>
+
+

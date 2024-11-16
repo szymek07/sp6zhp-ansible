@@ -1,0 +1,112 @@
+- name: Install speedtest-tracker
+  hosts: all
+  vars:
+    stack_name: "speedtest-tracker"
+    stack_deployed: "false"
+    docker_primary_env_name: "primary"
+  vars_files:
+    - ../vars/speedtest_vault.yaml
+  tasks:
+    - name: Fail if portainer_api_key is undefined
+      ansible.builtin.fail: msg="portainer_api_key is not defined. Create Portainer API key from Portainer UI and set in playbook additional vars."
+      when: portainer_api_key is undefined
+
+    - name: Show user info
+      debug:
+        msg:
+          - "docker_stacks_dir is {% if docker_stacks_dir is defined %}defined. Docker stacks files will be stored in {{ docker_stacks_dir }}.{% else %}not defined. Docker stacks files wil be stored in temporary dir.{% endif %}"
+
+    - name: Install httpie
+      apt:
+        pkg:
+          - httpie
+
+    - name: Get primary docker environment via portainer api
+      uri:
+        url: "https://127.0.0.1:9443/api/endpoints?name={{ docker_primary_env_name }}"
+        method: GET
+        headers:
+          X-API-Key: "{{ portainer_api_key }}"
+        validate_certs: false
+      register: endpoints_response
+
+#    - name: Debug endpoints_response
+#      debug:
+#        var: endpoints_response
+
+    - name: Store endpoint Id
+      set_fact:
+        endpoint_id: "{{ endpoints_response.json[0].Id }}"
+
+    - name: Debug endpoint_id
+      debug:
+        var: endpoint_id
+
+    - name: Get Swarm ID
+      shell: |
+        {% raw %}
+        docker info --format '{{.Swarm.Cluster.ID}}'
+        {% endraw %}
+      register: swarm_id_output
+
+#    - debug:
+#        var: swarm_id_output
+
+    - name: Store Swarm Id
+      set_fact:
+        swarm_id: "{{ swarm_id_output.stdout }}"
+
+    - debug:
+        var: swarm_id
+
+    - name: Get deployed stacks
+      uri:
+        url: "https://127.0.0.1:9443/api/stacks"
+        method: GET
+        headers:
+          X-API-Key: "{{ portainer_api_key }}"
+        validate_certs: false
+      register: stacks_response
+
+#    - name: Debug stacks_response
+#      debug:
+#        msg: "{{ stacks_response }}"
+
+    - name: Search for stack
+      set_fact:
+        stack_deployed: "true"
+      loop: "{{ stacks_response.json }}"
+      loop_control:
+        label: "{{ item.Name }}"
+      when: item.Name == stack_name
+
+    - name: Stack status
+      debug:
+        msg: "Stack deployed: {{ stack_deployed }}"
+
+    - name: Create docker stacks dir
+      file:
+        path: "{{ docker_stacks_dir  }}"
+        state: directory 
+      when: stack_deployed == "false" and docker_stacks_dir is defined
+
+    - name: Create compose file
+      template:
+        src: speedtest-tracker-compose.yaml.j2
+        dest: "{{ docker_stacks_dir | default('/tmp') }}/speedtest-tracker-compose.yaml"
+        output_encoding: "utf-8"
+      when: stack_deployed == "false"
+
+    - name: Deploy stack
+      shell: |
+        http --verify=no --form POST https://127.0.0.1:9443/api/stacks/create/swarm/file \
+        X-API-Key:"{{ portainer_api_key }}"  \
+        endpointId={{ endpoint_id }} \ 
+        SwarmID="{{ swarm_id }}" \
+        Name="{{ stack_name }}" \
+        Env="[{\"name\": \"SPEEDTEST_DB_PASSWORD\", \"value\": \"{{ speedtest_db_password }}\"}]" \
+        file@"{{ docker_stacks_dir | default('/tmp') }}/speedtest-tracker-compose.yaml"
+      register: create_stack_response
+      failed_when: "'message' in create_stack_response.stdout" #message text appears when stack is failed to deploy
+      when: stack_deployed == "false"
+
