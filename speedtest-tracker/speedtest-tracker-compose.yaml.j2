@@ -31,7 +31,7 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_DB=speedtest_tracker
+      POSTGRES_DB: speedtest_tracker
       POSTGRES_USER: speedy
       POSTGRES_PASSWORD: "${SPEEDTEST_DB_PASSWORD}"
     volumes:
