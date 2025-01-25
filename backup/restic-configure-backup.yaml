@@ -5,6 +5,9 @@
     schedule: "02:18"
     retention_keep_time: "30d"
   tasks:
+    - name: Ping
+    - ping:
+
     - name: Check restic repo is initialized
       shell: restic check
       register: check_restic_repo
