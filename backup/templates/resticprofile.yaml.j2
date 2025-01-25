@@ -7,6 +7,15 @@ default:
 
   status-file: "{{ restic_log_location }}/resticprfile-backup-status.json"
 
+  retention:
+    after-backup: true
+    keep-within: "{{ retention_keep_time }}"
+    prune: true
+
+  check:
+    read-data: true
+    schedule: "weekly"
+
   backup:
     verbose: true
     source:
@@ -22,13 +31,6 @@ default:
     schedule: "{{ schedule }}"
     schedule-permission: system
     schedule-log: "{{ restic_log_location }}/resticprofile-scheduled-backup.log"
-    retention:
-      after-backup: true
-      keep-within: "{{ retention_keep_time }}"
-      prune: true
-    check:
-      read-data: true
-      schedule: "weekly"
     run-before:
       - 'echo "=== run-before backup in profile $PROFILE_NAME"'
 {% if maria_db_container_to_backup is defined %}
