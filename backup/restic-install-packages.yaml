@@ -84,3 +84,19 @@
         name: jq
         state: present
       when: jq_check.rc != 0
+
+    - name: Check rclone is installed
+      shell: "which rclone"
+      register: rclone_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display rclone installation status
+      debug:
+        msg: "rclone is {% if rclone_check.rc == 0 %}installed{% else %}not installed{% endif %}"
+
+    - name: Install rclone if not installed
+      package:
+        name: rclone
+        state: present
+      when: rclone_check.rc != 0
