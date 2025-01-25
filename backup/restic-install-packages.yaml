@@ -95,8 +95,26 @@
       debug:
         msg: "rclone is {% if rclone_check.rc == 0 %}installed{% else %}not installed{% endif %}"
 
-    - name: Install rclone if not installed
-      package:
-        name: rclone
-        state: present
+    - name: Download rclone install script
+      get_url:
+        url: https://rclone.org/install.sh
+        dest: /tmp/install_rclone.sh
+        mode: '0755'
       when: rclone_check.rc != 0
+
+    - name: Run the rclone install script
+      shell: /tmp/install_rclone.sh
+      args:
+        executable: /bin/bash
+      when: rclone_check.rc != 0
+
+    - name: Verify rclone installation
+      shell: "which rclone"
+      register: rclone_post_check
+      changed_when: false
+      failed_when: rclone_post_check.rc != 0
+
+    - name: Ensure rclone is properly installed
+      debug:
+        msg: "rclone has been installed successfully!"
+      when: rclone_post_check.rc == 0
