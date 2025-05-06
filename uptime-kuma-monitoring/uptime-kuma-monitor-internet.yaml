@@ -1,0 +1,50 @@
+- name: Create internet monitoring script for Uptime Kuma
+  hosts: all
+  become: true
+  vars:
+    monitoring_service_name: "monitor-internet"
+    script_path: "/usr/local/bin/{{ monitoring_service_name }}.sh"
+    service_path: "/etc/systemd/system/{{ monitoring_service_name }}.service"
+    timer_path: "/etc/systemd/system/{{ monitoring_service_name }}.timer"
+  tasks:
+
+    - name: Install required packages (curl, bc)
+      package:
+        name:
+          - curl
+          - bc
+        state: present
+
+    - name: Create monitoring script
+      template:
+        src: monitor-internet.sh.j2
+        dest: "{{ script_path }}"
+        output_encoding: "utf-8"
+        mode: 0755
+
+    - name: Create monitoring service
+      template:
+        src: monitor-internet.service.j2
+        dest: "{{ service_path }}"
+        output_encoding: "utf-8"
+        mode: 0644
+
+    - name: Create monitoring timer
+      template:
+        src: monitor-internet.timer.j2
+        dest: "{{ timer_path }}"
+        output_encoding: "utf-8"
+        mode: 0644
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+      when: service_file.changed
+
+    - name: Enable and start monitoring service
+      systemd:
+        name: "{{ monitoring_service_name }}"
+        state: started
+        enabled: yes
+        
+        

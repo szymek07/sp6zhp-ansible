@@ -1,0 +1,31 @@
+#!/bin/bash
+
+UPTIME_KUMA_URL="{{ uptime_kuma_push_url }}"
+
+# Maksymalny czas odpowiedzi: 5 sekund
+CURL_TIMEOUT=5
+CURL_CONNECT_TIMEOUT=3
+
+# Testujemy google.pl i mierzymy czas
+response=$(curl -o /dev/null -s --max-time $CURL_TIMEOUT --connect-timeout $CURL_CONNECT_TIMEOUT -w "%{time_total}" https://www.google.pl)
+
+# Odczyt kodu HTTP (osobne zapytanie, żeby też mieć timeout)
+http_code=$(curl -o /dev/null -s --max-time $CURL_TIMEOUT --connect-timeout $CURL_CONNECT_TIMEOUT -w "%{http_code}" https://www.google.pl)
+
+# Jeśli curl się nie połączył (response może być puste)
+if [ -z "$response" ]; then
+    response=0
+fi
+
+# Konwersja sekund -> milisekundy
+ping_ms=$(( $(echo "$response * 1000" | bc | awk '{print int($1)}') ))
+
+if [ "$http_code" == "200" ]; then
+    echo "Google OK, czas: ${ping_ms}ms"
+    curl -s "${UPTIME_KUMA_URL}?status=up&msg=Ping%20${ping_ms}ms&ping=${ping_ms}"
+else
+    echo "Błąd! Google zwrócił kod $http_code"
+    curl -s "${UPTIME_KUMA_URL}?status=down&msg=Błąd%20HTTP%20${http_code}"
+fi
+
+echo ""

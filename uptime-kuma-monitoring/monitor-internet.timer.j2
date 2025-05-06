@@ -1,0 +1,9 @@
+[Unit]
+Description=Internet monitoring timer
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
