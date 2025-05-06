@@ -39,7 +39,6 @@
     - name: Reload systemd daemon
       systemd:
         daemon_reload: yes
-      when: service_file.changed
 
     - name: Enable and start monitoring service
       systemd:
