@@ -2,7 +2,7 @@
   hosts: all
   become: true
   vars:
-    monitoring_service_name: "monitor-internet"
+    monitoring_service_name: "monitor_internet"
     script_path: "/usr/local/bin/{{ monitoring_service_name }}.sh"
     service_path: "/etc/systemd/system/{{ monitoring_service_name }}.service"
     timer_path: "/etc/systemd/system/{{ monitoring_service_name }}.timer"
@@ -42,7 +42,7 @@
 
     - name: Enable and start monitoring service
       systemd:
-        name: "{{ monitoring_service_name }}"
+        name: "{{ monitoring_service_name }}.timer"
         state: started
         enabled: yes
         
